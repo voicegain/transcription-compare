@@ -12,7 +12,6 @@ setuptools.setup(
     description="Compare transcription",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    packages=setuptools.find_packages(),
     install_requires=REQUIRES,
     scripts=['transcribe-compare'],
 )
