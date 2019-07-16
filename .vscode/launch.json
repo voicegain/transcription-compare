@@ -1,0 +1,30 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+
+        {
+            "name": "Python: transcribe-compare --help",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/transcribe-compare",
+            "args": ["--help"],
+            "console": "integratedTerminal",
+            "pythonPath": "${config:python.pythonPath}",
+            "env": {
+                "PYTHONPATH": "${workspaceFolder}"
+            }
+        },
+        {
+            "name": "Python: transcribe-compare -r -o",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/transcribe-compare",
+            "args": ["-r", "foo bar", "-o", "fuu bar", "-a", "-e", "CER"],
+            "console": "integratedTerminal",
+            "pythonPath": "${config:python.pythonPath}",
+            "env": {
+                "PYTHONPATH": "${workspaceFolder}"
+            }
+        }
+    ]
+}
