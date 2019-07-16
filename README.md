@@ -1,6 +1,6 @@
 # Utility to compare output transcript to reference
 
-Uses [Ukkonen algorithm](https://www.sciencedirect.com/science/article/pii/S0019995885800462) to efficiently compute Leneshtein distance and caracter error rate (CER).
+Uses [Ukkonen algorithm](https://www.sciencedirect.com/science/article/pii/S0019995885800462) to efficiently compute Leneshtein distance and character error rate (CER).
 
 Additionally it can output alignment information.
 
