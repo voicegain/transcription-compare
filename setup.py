@@ -1,5 +1,6 @@
 import setuptools
 
+# cli
 REQUIRES = ["click"]
 
 with open("README.md", "r") as fh:
