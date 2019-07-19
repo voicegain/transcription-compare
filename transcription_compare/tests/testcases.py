@@ -1,8 +1,7 @@
 import unittest
 from transcription_compare.levenshtein_distance_calculator import UKKLevenshteinDistanceCalculator
-from transcription_compare.tokenizer import CharacterTokenizer
+from transcription_compare.tokenizer import CharacterTokenizer, WordTokenizer
 from transcription_compare.results import AlignmentResult
-
 
 
 class TestCerFirst(unittest.TestCase):
@@ -14,6 +13,34 @@ class TestCerFirst(unittest.TestCase):
             tokenizer=CharacterTokenizer(),
             get_alignment_result=True
         )
+        self.wer_calculator = UKKLevenshteinDistanceCalculator(
+            tokenizer=WordTokenizer(),
+            get_alignment_result=True
+        )
+
+    def test_files(self):
+        """
+        """
+        file1 = open(r'C:\Users\huishen\Desktop\r_file.txt', 'r')
+        R = file1.read()
+
+        file2 = open(r'C:\Users\huishen\Desktop\o_file.txt', 'r')
+        O = file2.read()
+
+        result = self.wer_calculator.get_distance(R, O)
+        print(result.distance)
+        self.assertEqual(result.distance, 373)
+
+        expected_alignment_result = AlignmentResult()
+        expected_alignment_result.load_from_file(r'C:\Users\huishen\Desktop\resultoffilr.txt', expected_alignment_result)
+        distance, substitution, insertion, deletion,DISTANCE =expected_alignment_result.calculate_four_things()
+        print(distance, substitution, insertion, deletion, DISTANCE)
+       # self.assertEqual(result.alignment_result, expected_alignment_result)
+
+
+
+
+
 
     def test_first(self):
         """
@@ -25,6 +52,9 @@ class TestCerFirst(unittest.TestCase):
         expected_alignment_result.add_token(ref_token="b", output_tokens=["f"], add_to_left=False)
         expected_alignment_result.add_token(ref_token="c", output_tokens=["g"], add_to_left=False)
         # result.alignment_result == expected_alignment_result
+        distance, substitution, insertion, deletion, DISTANCE = expected_alignment_result.calculate_four_things()
+        print(distance, substitution, insertion, deletion, DISTANCE)
+
         print(result.alignment_result)
         print(expected_alignment_result)
         self.assertEqual(result.alignment_result, expected_alignment_result)
@@ -40,6 +70,8 @@ class TestCerFirst(unittest.TestCase):
         expected_alignment_result = AlignmentResult()
         expected_alignment_result.add_token(ref_token="A", output_tokens=["A", "b"], add_to_left=False)
         expected_alignment_result.add_token(ref_token="V", output_tokens=["c"], add_to_left=False)
+        distance, substitution, insertion, deletion, DISTANCE = expected_alignment_result.calculate_four_things()
+        print(distance, substitution, insertion, deletion, DISTANCE)
         print(result.alignment_result)
         print(expected_alignment_result)
         self.assertEqual(result.alignment_result, expected_alignment_result)
@@ -57,6 +89,8 @@ class TestCerFirst(unittest.TestCase):
         expected_alignment_result.add_token(ref_token="a", output_tokens=[], add_to_left=False)
         expected_alignment_result.add_token(ref_token="n", output_tokens=[], add_to_left=False)
         expected_alignment_result.merge_none_tokens()
+        distance, substitution, insertion, deletion, DISTANCE = expected_alignment_result.calculate_four_things()
+        print(distance, substitution, insertion, deletion, DISTANCE)
         print(result.alignment_result)
         print(expected_alignment_result)
         self.assertEqual(result.alignment_result, expected_alignment_result)
@@ -69,6 +103,8 @@ class TestCerFirst(unittest.TestCase):
         self.assertEqual(result.distance, 5)
         expected_alignment_result = AlignmentResult()
         expected_alignment_result.add_token(ref_token="b", output_tokens=["b", "a", "t", "m", "a", "n"], add_to_left=False)
+        distance, substitution, insertion, deletion, DISTANCE = expected_alignment_result.calculate_four_things()
+        print(distance, substitution, insertion, deletion, DISTANCE)
         print(result.alignment_result)
         print(expected_alignment_result)
         self.assertEqual(result.alignment_result, expected_alignment_result)
@@ -85,6 +121,8 @@ class TestCerFirst(unittest.TestCase):
         expected_alignment_result.add_token(ref_token="R", output_tokens=[], add_to_left=False)
         expected_alignment_result.add_token(ref_token="Y", output_tokens=["Y"], add_to_left=False)
         expected_alignment_result.merge_none_tokens()
+        distance, substitution, insertion, deletion, DISTANCE = expected_alignment_result.calculate_four_things()
+        print(distance, substitution, insertion, deletion, DISTANCE)
         print(result.alignment_result)
         print(expected_alignment_result)
         self.assertEqual(result.alignment_result, expected_alignment_result)
@@ -102,6 +140,8 @@ class TestCerFirst(unittest.TestCase):
         expected_alignment_result.add_token(ref_token="s", output_tokens=["s"], add_to_left=False)
         expected_alignment_result.add_token(ref_token="t", output_tokens=["t", "e", "r"], add_to_left=False)
         expected_alignment_result.merge_none_tokens()
+        distance, substitution, insertion, deletion, DISTANCE = expected_alignment_result.calculate_four_things()
+        print(distance, substitution, insertion, deletion, DISTANCE)
         print(result.alignment_result)
         print(expected_alignment_result)
         self.assertEqual(result.alignment_result, expected_alignment_result)
@@ -121,6 +161,8 @@ class TestCerFirst(unittest.TestCase):
         expected_alignment_result.add_token(ref_token="l", output_tokens=["l"], add_to_left=False)
         expected_alignment_result.add_token(ref_token="f", output_tokens=["f"], add_to_left=False)
         expected_alignment_result.merge_none_tokens()
+        distance, substitution, insertion, deletion, DISTANCE = expected_alignment_result.calculate_four_things()
+        print(distance, substitution, insertion, deletion, DISTANCE)
         print(result.alignment_result)
         print(expected_alignment_result)
         self.assertEqual(result.alignment_result, expected_alignment_result)
@@ -163,6 +205,8 @@ class TestCerFirst(unittest.TestCase):
         expected_alignment_result.add_token(ref_token="a", output_tokens=["o"], add_to_left=False)
         expected_alignment_result.add_token(ref_token=" ", output_tokens=["o"], add_to_left=False)
         expected_alignment_result.add_token(ref_token="?", output_tokens=["o"], add_to_left=False)
+        distance, substitution, insertion, deletion, DISTANCE = expected_alignment_result.calculate_four_things()
+        print(distance, substitution, insertion, deletion, DISTANCE)
         print(result.alignment_result)
         print(expected_alignment_result)
         self.assertEqual(result.alignment_result, expected_alignment_result)
@@ -186,6 +230,8 @@ class TestCerFirst(unittest.TestCase):
         expected_alignment_result.add_token(ref_token="d", output_tokens=["d"], add_to_left=False)
         expected_alignment_result.add_token(ref_token="a", output_tokens=["a"], add_to_left=False)
         expected_alignment_result.add_token(ref_token="y", output_tokens=["y"], add_to_left=False)
+        distance, substitution, insertion, deletion, DISTANCE = expected_alignment_result.calculate_four_things()
+        print(distance, substitution, insertion, deletion, DISTANCE)
         print(result.alignment_result)
         print(expected_alignment_result)
         self.assertEqual(result.alignment_result, expected_alignment_result)

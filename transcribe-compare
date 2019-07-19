@@ -13,7 +13,7 @@ from transcription_compare.tokenizer import CharacterTokenizer, WordTokenizer
 @click.option('--alignment', '-a', default=False, is_flag=True, help='Do you want to see the alignment result?')
 @click.option('--error_type', '-e', default='CER', type=click.Choice(['CER', 'WER']))
 @click.option('--output_format', '-j', default='TABLE', type=click.Choice(['JSON', 'TABLE']))
-def main(reference, output, reference_file, output_file, alignment, error_type,output_format):
+def main(reference, output, reference_file, output_file, alignment, error_type,output_format,digit):
     """
     Transcription compare tool provided by VoiceGain
     """
@@ -50,6 +50,7 @@ def main(reference, output, reference_file, output_file, alignment, error_type,o
 
     if output_format == 'JSON':
         click.echo(calculator.get_distance(reference, output).to_json())
+
 
 
 if __name__ == '__main__':

@@ -6,14 +6,54 @@ class AlignmentResult:
     """
     Result of alignment, used by edit distance algorithm
     """
-    def __init__(self):
-        self.aligned_tokens_list = []
+
+    def __init__(self, aligned_tokens_list=None):
+        if aligned_tokens_list is None:
+            self.aligned_tokens_list = []
+        else:
+            self.aligned_tokens_list = aligned_tokens_list
 
     def __iter__(self):
         return self.aligned_tokens_list.__iter__()
 
+    def __len__(self):
+        return len(self.aligned_tokens_list)
+
+    def __getitem__(self, item):
+        return AlignmentResult(self.aligned_tokens_list[item])
+
+    def __add__(self, other):
+        return AlignmentResult(self.aligned_tokens_list + other.aligned_tokens_list)
+
+    def get_reference(self):
+        return [i.reference for i in self.aligned_tokens_list]
+
+    def get_reference_str(self):
+        return " ".join(self.get_reference())
+
+    def get_outputs(self):
+        outputs = []
+        for i in self.aligned_tokens_list:
+            outputs += i.outputs
+        return outputs
+
+    def get_outputs_str(self):
+        return " ".join(self.get_outputs())
+
     def get(self, i):
         return self.aligned_tokens_list[i]
+
+    @staticmethod
+    def load_from_file(file_path, result_name):
+        with open(file_path, "r") as f:
+            for x in f:
+                x_list = x.split()
+                result_name.add_token(
+                            ref_token=x_list[0],
+                            output_tokens=x_list[1:],
+                            add_to_left=False)
+                # print(result_name)
+        return result_name
 
     def add_token(self, ref_token, output_tokens: List, add_to_left: bool = True):
         """
@@ -126,6 +166,27 @@ class AlignmentResult:
                 return False
         return True
 
+    def calculate_four_things(self):
+        distance = 0
+        substitution = 0
+        insertion = 0
+        deletion = 0
+        for aligned_token in self.aligned_tokens_list:
+            if not aligned_token.match():
+                if len(aligned_token.outputs) == 0:
+                    deletion += 1
+                    distance += 1
+                elif len(aligned_token.outputs) > 1:
+                    insertion += len(aligned_token.outputs)-1
+                    distance += len(aligned_token.outputs)-1
+                else:
+                    substitution += 1
+                    distance += 1
+        DISTANCE = substitution + insertion + deletion
+        return distance, substitution, insertion, deletion, DISTANCE
+
+
+        # print(result_name)
 
 class AlignedToken:
     """
@@ -233,6 +294,15 @@ def main():
     # merge
     alignment_result.merge_none_tokens()
     print(alignment_result)
+
+    print(len(alignment_result))
+    print(alignment_result[0:2])
+    print(alignment_result.get_reference())
+    print(alignment_result.get_reference_str())
+    print(alignment_result.get_outputs())
+    print(alignment_result.get_outputs_str())
+
+    print(alignment_result + alignment_result)
 
 
 if __name__ == "__main__":
