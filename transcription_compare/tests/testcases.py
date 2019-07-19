@@ -37,11 +37,6 @@ class TestCerFirst(unittest.TestCase):
         print(distance, substitution, insertion, deletion, DISTANCE)
        # self.assertEqual(result.alignment_result, expected_alignment_result)
 
-
-
-
-
-
     def test_first(self):
         """
         """
@@ -58,9 +53,6 @@ class TestCerFirst(unittest.TestCase):
         print(result.alignment_result)
         print(expected_alignment_result)
         self.assertEqual(result.alignment_result, expected_alignment_result)
-
-
-
 
     def test_2nd(self):
         """
@@ -94,7 +86,6 @@ class TestCerFirst(unittest.TestCase):
         print(result.alignment_result)
         print(expected_alignment_result)
         self.assertEqual(result.alignment_result, expected_alignment_result)
-
 
     def test_4(self):
         """
@@ -211,7 +202,7 @@ class TestCerFirst(unittest.TestCase):
         print(expected_alignment_result)
         self.assertEqual(result.alignment_result, expected_alignment_result)
 
-    def test_9(self):
+    def test_10(self):
         """
         """
         result = self.calculator.get_distance('happyeveryday', 'happybirthday')
@@ -235,6 +226,7 @@ class TestCerFirst(unittest.TestCase):
         print(result.alignment_result)
         print(expected_alignment_result)
         self.assertEqual(result.alignment_result, expected_alignment_result)
+
 
 if __name__ == '__main__':
     unittest.main()

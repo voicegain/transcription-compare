@@ -166,8 +166,7 @@ class AlignmentResult:
                 return False
         return True
 
-    def calculate_four_things(self):
-        distance = 0
+    def calculate_three_kinds_of_distance(self):
         substitution = 0
         insertion = 0
         deletion = 0
@@ -175,18 +174,59 @@ class AlignmentResult:
             if not aligned_token.match():
                 if len(aligned_token.outputs) == 0:
                     deletion += 1
-                    distance += 1
                 elif len(aligned_token.outputs) > 1:
                     insertion += len(aligned_token.outputs)-1
-                    distance += len(aligned_token.outputs)-1
                 else:
                     substitution += 1
-                    distance += 1
-        DISTANCE = substitution + insertion + deletion
-        return distance, substitution, insertion, deletion, DISTANCE
+        distance = substitution + insertion + deletion
+        return distance, substitution, insertion, deletion
 
+    def get_error_section_list(self):
+        """
+        get AlignmentResultErrorSectionList
+        :return:
+        """
+        not_match_n = 0
+        error_section_list = AlignmentResultErrorSectionList()
+        for (M, aligned_token) in enumerate(self.aligned_tokens_list):
+            if aligned_token.match():
+                if not_match_n > 0:
+                    start_ind = M - not_match_n
+                    error_section_list.add(
+                        alignment_result_error_section=AlignmentResultErrorSection(
+                            original_alignment_result=AlignmentResult(self.aligned_tokens_list[start_ind:M]),
+                            start_ind=start_ind,
+                            end_ind=M
+                        )
+                    )
+                not_match_n = 0
+            else:
+                not_match_n += 1
+        if not_match_n > 0:
+            error_section_list.add(
+                alignment_result_error_section=AlignmentResultErrorSection(
+                    original_alignment_result=AlignmentResult(self.aligned_tokens_list[-not_match_n:]),
+                    start_ind=len(self.aligned_tokens_list) - not_match_n,
+                    end_ind=len(self.aligned_tokens_list)
+                )
+            )
+        return error_section_list
 
-        # print(result_name)
+    def apply_error_section_list(self, error_section_list):
+        """
+        Apply AlignmentResultErrorSectionList back to the alignment result
+        :return:
+        """
+        start_ind = 0
+        output_aligned_tokens_list = []
+        for error_section in error_section_list:
+            if error_section.alignment_result_correction is not None:
+                output_aligned_tokens_list += self.aligned_tokens_list[start_ind:error_section.start_ind]
+                output_aligned_tokens_list += error_section.alignment_result_correction.aligned_tokens_list
+                start_ind = error_section.end_ind
+        output_aligned_tokens_list += self.aligned_tokens_list[start_ind:]
+        self.aligned_tokens_list = output_aligned_tokens_list
+
 
 class AlignedToken:
     """
@@ -233,6 +273,46 @@ class AlignedToken:
             if self.reference == self.outputs[0]:
                 return True
         return False
+
+
+class AlignmentResultErrorSectionList:
+    """
+    The Error Section list from the alignment result
+    In alignment_result, the ErrorSectionList can be get by get_error_section_list method
+    After correct the ErrorSectionList, use the apply_error_section_list method to apply the correction
+    """
+    def __init__(self):
+        self.alignment_result_error_section_list = []
+
+    def __iter__(self):
+        return self.alignment_result_error_section_list.__iter__()
+
+    def __getitem__(self, item):
+        return self.alignment_result_error_section_list[item]
+
+    def add(self, alignment_result_error_section):
+        if len(self.alignment_result_error_section_list) > 0:
+            last_error_section = self.alignment_result_error_section_list[-1]
+            if last_error_section.end_ind >= alignment_result_error_section.start_ind:
+                raise ValueError("New alignment_result_error_section.start_ind <= last.end_ind")
+        self.alignment_result_error_section_list.append(alignment_result_error_section)
+
+
+class AlignmentResultErrorSection:
+    """
+    One error section in the alignment result
+    Contain the original alignment_result (error part), and the corrected alignment_result
+    """
+    def __init__(self, original_alignment_result, start_ind, end_ind):
+        self.original_alignment_result = original_alignment_result
+        self.start_ind = start_ind
+        self.end_ind = end_ind
+        self.alignment_result_correction = None
+        if self.start_ind >= self.end_ind:
+            raise ValueError("AlignmentResultErrorSection start_ind >= end_ind")
+
+    def set_correction(self, alignment_result_correction):
+        self.alignment_result_correction = alignment_result_correction
 
 
 def main():
@@ -303,6 +383,34 @@ def main():
     print(alignment_result.get_outputs_str())
 
     print(alignment_result + alignment_result)
+
+    print("error_section_list examples")
+    alignment_result_with_error = AlignmentResult()
+    alignment_result_with_error.add_token(ref_token="on", output_tokens=["on"], add_to_left=False)
+    alignment_result_with_error.add_token(ref_token="1", output_tokens=["one"], add_to_left=False)
+    alignment_result_with_error.add_token(ref_token="2", output_tokens=["two"], add_to_left=False)
+    alignment_result_with_error.add_token(ref_token="on", output_tokens=["on"], add_to_left=False)
+    alignment_result_with_error.add_token(ref_token="3", output_tokens=["three"], add_to_left=False)
+    print(alignment_result_with_error)
+
+    error_list = alignment_result_with_error.get_error_section_list()
+
+    for e in error_list:
+        print(e.original_alignment_result)
+
+    # fix first one
+    correct_r = AlignmentResult()
+    correct_r.add_token(ref_token="one", output_tokens=["one"], add_to_left=False)
+    correct_r.add_token(ref_token="two", output_tokens=["two"], add_to_left=False)
+    error_list[0].set_correction(correct_r)
+
+    # fix second one
+    correct_r = AlignmentResult()
+    correct_r.add_token(ref_token="three", output_tokens=["three"], add_to_left=False)
+    error_list[1].set_correction(correct_r)
+
+    alignment_result_with_error.apply_error_section_list(error_list)
+    print(alignment_result_with_error)
 
 
 if __name__ == "__main__":

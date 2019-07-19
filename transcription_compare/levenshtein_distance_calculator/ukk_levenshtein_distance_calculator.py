@@ -1,7 +1,6 @@
 from .abstract_levenshtein_dsitance_calculator import AbstractLevenshteinDistanceCalculator
 from ..results import Result, AlignmentResult
 from ..ukk_matrix import FKPMatrix, FKPColumn
-import sys
 
 
 class UKKLevenshteinDistanceCalculator(AbstractLevenshteinDistanceCalculator):
@@ -19,15 +18,7 @@ class UKKLevenshteinDistanceCalculator(AbstractLevenshteinDistanceCalculator):
         if self.get_alignment_result:
             if not is_final:
                 return Result(distance=distance, is_final=is_final, len_ref=len(ref_tokens_list))
-                # raise NotImplementedError("get_alignment_result == True is not supported")
             else:
-                # sys.setrecursionlimit(4500)
-                # alignment_result = AlignmentResult()
-                # self._get_me_the_result(
-                #     fkp, row, col, count=0,
-                #     s=ref_tokens_list, t=output_tokens_list,
-                #     alignment_result=alignment_result
-                # )
                 alignment_result = self._get_alignment_result(
                     fkp, row, col, s=ref_tokens_list, t=output_tokens_list
                 )
@@ -143,8 +134,6 @@ class UKKLevenshteinDistanceCalculator(AbstractLevenshteinDistanceCalculator):
                 new_col.set_n(n_row=i, new_n=t)
         fkp.append_col(new_col=new_col)
         return last_col_is_created, mid, distance, rows
-
-
 
     def _get_alignment_result(self, fkp, row, col, s, t):
         alignment_result = AlignmentResult()
