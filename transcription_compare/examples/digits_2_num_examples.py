@@ -2,87 +2,109 @@ import inflect
 from transcription_compare.levenshtein_distance_calculator import UKKLevenshteinDistanceCalculator
 from transcription_compare.tokenizer import CharacterTokenizer, WordTokenizer
 from transcription_compare.results import AlignmentResult
+from transcription_compare.utils import SimpleReferenceCombinationGenerator
+from transcription_compare.utils.digit_util import our_is_digit
+
+
+def update_alignment_result(alignment_result):
+    #   alignment_result = result.alignment_result
+    aligned_tokens_list = alignment_result.aligned_tokens_list
+
+    def number_to_word(num):
+        words = set()
+        words.add(p.number_to_words(num))
+        words.add(p.number_to_words(num, group=1))#only have 3 group
+        words.add(p.number_to_words(num, group=2))#好像可以, getlist=True
+        words.add(p.number_to_words(num, group=3))
+        words.add(p.number_to_words(p.ordinal(num)))
+        words = list(words)
+        for index, x in enumerate(words):
+            if x.find(",") >= 1:
+                words[index] = words[index].replace(",", "")
+        return words
+
+    # alignment_result[0].aligned_tokens_list[0].reference
+    # alignment_result.aligned_tokens_list[0].reference (correct)
+    calculator = UKKLevenshteinDistanceCalculator(
+                tokenizer=WordTokenizer(),
+                get_alignment_result=False
+            )
+    output_string = alignment_result.get_outputs_str()
+    old_distance = alignment_result.calculate_three_kinds_of_distance()[0]
+    generator = SimpleReferenceCombinationGenerator()
+    tmp_result = None
+    for index in range(0, len(alignment_result)):
+        # if aligned_tokens_list[index].reference.isdigit() is True:
+        result_digit = our_is_digit(aligned_tokens_list[index].reference)
+        if result_digit is not False:
+            for r in result_digit:
+                generator.add_new_token_options(r)
+        else:
+            generator.add_new_token_options(aligned_tokens_list[index].reference)
+        # print('generator.get_all_reference()', generator.get_all_reference())
+        for x in generator.get_all_reference():
+            print('x', x)
+            x = " ".join(x)
+            distance = calculator.get_distance(x, output_string).distance
+            # print('x', x)
+            # print('output_string', output_string)
+            # print('distance', distance)
+
+            if distance < old_distance:
+                old_distance = distance
+                tmp_result = x
+    if tmp_result is None:
+        return None
+    calculator2 = UKKLevenshteinDistanceCalculator(
+        tokenizer=WordTokenizer(),
+        get_alignment_result=True
+    )
+    update_result = calculator2.get_distance(tmp_result, output_string).alignment_result
+    return update_result
+
+
+
 
 p = inflect.engine()
 
 alignment_result = AlignmentResult()
 
+alignment_result.add_token(ref_token="w", output_tokens=["w"], add_to_left=False)
+alignment_result.add_token(ref_token="5", output_tokens=["e"], add_to_left=False)
+alignment_result.add_token(ref_token="r", output_tokens=["r"], add_to_left=False)
 alignment_result.add_token("1", ["one"])
 
-alignment_result.add_token("2", ["two"], add_to_left=False)
+alignment_result.add_token("21", ["twenty-one", 'a', 'c'], add_to_left=False)
 
-alignment_result.add_token("3", ["three"], add_to_left=False)
+alignment_result.add_token("312", ["three", "one", "two"], add_to_left=False)
+alignment_result.add_token(ref_token="e", output_tokens=["e", " ", " "], add_to_left=False)
+alignment_result.add_token(ref_token="w", output_tokens=["w"], add_to_left=False)
+alignment_result.add_token(ref_token="7", output_tokens=["o"], add_to_left=False)
+alignment_result.add_token("1990s", ['nineteen', 'nineties'], add_to_left=False)
 
-for aligned_token in alignment_result:
-    print(aligned_token.reference)
+alignment_result.add_token("10,000", ["ten", "thousand"], add_to_left=False)
+alignment_result.add_token("H2o2", ['H', 'two', 'o', 'two'], add_to_left=False)
+alignment_result.add_token(ref_token="l", output_tokens=["l"], add_to_left=False)
+alignment_result.add_token(ref_token="f", output_tokens=["f"], add_to_left=False)
+print(alignment_result)
+error_list = alignment_result.get_error_section_list()
+for e in error_list:
+    print("+++++++++++++++")
+    print(e.original_alignment_result)
+    # updated_alignment_result = update_alignment_result(e.original_alignment_result)
+    updated_alignment_result = update_alignment_result(e.original_alignment_result)
+    e.set_correction(updated_alignment_result)
 
-aligned_tokens = alignment_result.aligned_tokens_list
-print('list', aligned_tokens)
-print(aligned_tokens[0].reference)
+alignment_result.apply_error_section_list(error_list)
 
-print(len(aligned_tokens))
+print(alignment_result)
 
-def number_to_word(num):
-    words = set()
-    words.add(p.number_to_words(num))
-    words.add(p.number_to_words(num, group=1))#only have 3 group
-    words.add(p.number_to_words(num, group=2))#好像可以, getlist=True
-    words.add(p.number_to_words(num, group=3))
-    words.add(p.number_to_words(p.ordinal(num)))
-    return list(words)
+# for aligned_token in error_list:
+#     print(aligned_token.reference)
 
-reference_string = ''
-calculator = UKKLevenshteinDistanceCalculator(
-            tokenizer=WordTokenizer(),
-            get_alignment_result=True
-        )
-output_string = alignment_result.get_outputs_str()
-reference_we_should_use = None
 
-for index in range(0, len(aligned_tokens)):
-    print(aligned_tokens[index])
-    if aligned_tokens[index].reference.isdigit() is True:
-        print('True', aligned_tokens[index])
-        print('True', aligned_tokens[index].reference)
-        print('True', number_to_word(aligned_tokens[index].reference))
-        current_row = number_to_word(aligned_tokens[index].reference)
-        print('current_row', current_row)
-        len_of_current_row = len(current_row)
-        count = 0
-        old_distance = calculator.get_distance(alignment_result.get_reference_str(), output_string).distance
-        print('old_distance', old_distance)
-        # print('len_of_current_row',len_of_current_row)
-        # while count <= len_of_current_row:
-        print('before for', reference_we_should_use)
-        for value in current_row:
-            count += 1
-            print('count', count)
-            print(value)
-            if reference_we_should_use is None:
-                print('None', reference_we_should_use)
-                reference_string = value
-                reference_string += ' '+alignment_result[index+1:].get_reference_str()
-                print('None,r', reference_string)
-                print('None,o', output_string)
-                new_distance = calculator.get_distance(reference_string, output_string).distance
-                print('None', 'distance', new_distance)
-                if new_distance < old_distance:
-                    reference_we_should_use = value
-                    distance = new_distance
-                    print('None, if', reference_we_should_use)
-            else:
-                print('yes',value)
-                print('yes', reference_we_should_use)
-                reference_string += " ".join(value)
-                reference_string += alignment_result[index+1:].get_reference_str()
-                print('yes,r', reference_string)
-                print('yes,o', output_string)
-                new_distance = calculator.get_distance(reference_string, output_string).distance
-                print('yes', 'distance', new_distance)
-                if new_distance < old_distance:
-                    reference_we_should_use += " ".join(value)
-                    distance = new_distance
-        print(reference_we_should_use)
-    else:
-        print('else',aligned_tokens[index])
-print(reference_we_should_use)
+# print(error_list.get_reference())
+#aligned_tokens = alignment_result.aligned_tokens_list
+#aligned_tokens = error_list.alignment_result_error_section_list
+#print('list', aligned_tokens)
+
