@@ -10,21 +10,6 @@ def update_alignment_result(alignment_result):
     #   alignment_result = result.alignment_result
     aligned_tokens_list = alignment_result.aligned_tokens_list
 
-    def number_to_word(num):
-        words = set()
-        words.add(p.number_to_words(num))
-        words.add(p.number_to_words(num, group=1))#only have 3 group
-        words.add(p.number_to_words(num, group=2))#好像可以, getlist=True
-        words.add(p.number_to_words(num, group=3))
-        words.add(p.number_to_words(p.ordinal(num)))
-        words = list(words)
-        for index, x in enumerate(words):
-            if x.find(",") >= 1:
-                words[index] = words[index].replace(",", "")
-        return words
-
-    # alignment_result[0].aligned_tokens_list[0].reference
-    # alignment_result.aligned_tokens_list[0].reference (correct)
     calculator = UKKLevenshteinDistanceCalculator(
                 tokenizer=WordTokenizer(),
                 get_alignment_result=False
@@ -43,7 +28,6 @@ def update_alignment_result(alignment_result):
             generator.add_new_token_options(aligned_tokens_list[index].reference)
         # print('generator.get_all_reference()', generator.get_all_reference())
         for x in generator.get_all_reference():
-            print('x', x)
             x = " ".join(x)
             distance = calculator.get_distance(x, output_string).distance
             # print('x', x)
