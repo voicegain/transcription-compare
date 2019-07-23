@@ -29,7 +29,7 @@ class TestCerFirst(unittest.TestCase):
 
         result = self.wer_calculator.get_distance(R, O)
         print(result.distance)
-        self.assertEqual(result.distance, 373)
+        self.assertEqual(result.distance, 372)
 
         expected_alignment_result = AlignmentResult()
         expected_alignment_result.load_from_file('resultoffilr.txt', expected_alignment_result)
