@@ -23,7 +23,7 @@ class UKKLevenshteinDistanceCalculator(AbstractLevenshteinDistanceCalculator):
                 alignment_result = self._get_alignment_result(
                     fkp, row, col, s=ref_tokens_list, t=output_tokens_list
                 )
-                ###
+
                 if self.digit_util is not None:
                     error_list = alignment_result.get_error_section_list()
                     for e in error_list:
