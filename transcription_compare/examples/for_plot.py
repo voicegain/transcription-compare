@@ -22,6 +22,25 @@ def cut_text(text, lenth):
     return textArr
 
 
+reference = 'APPLE BANANA WATER BYE OK NO PROBLEM TIME LOG SEARCH'
+output = 'APPLE BANANA HELLO WATER HA NO TIME LOG YES '
+spaces_count = reference.count(' ')
+length = len(reference)
+print(length)
+# print(spaces_count//2) #根据spaces的个数去判断
+
+spaces_spot = [k for k in range(len(reference)) if reference.find(' ', k) == k]
+print(spaces_spot)
+for i in range(2, len(spaces_spot), 2):  # 应该是3，要-1
+    print(i)
+    print(spaces_spot[i])
+    #     print(i+2)
+    #     print(spaces_spot[i+2])
+    if i == 2:
+        print(reference[0:spaces_spot[i]])
+    else:
+        print(reference[spaces_spot[i - 2]:spaces_spot[i + 2]])
+
 print(cut_text(reference, 3))
 
 
