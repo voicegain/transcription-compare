@@ -13,7 +13,11 @@ from transcription_compare.tokenizer import CharacterTokenizer, WordTokenizer
 @click.option('--alignment', '-a', default=False, is_flag=True, help='Do you want to see the alignment result?')
 @click.option('--error_type', '-e', default='CER', type=click.Choice(['CER', 'WER']))
 @click.option('--output_format', '-j', default='TABLE', type=click.Choice(['JSON', 'TABLE']))
-def main(reference, output, reference_file, output_file, alignment, error_type,output_format,digit):
+@click.option('--to_lower', '-l', default=False, is_flag=True, help='Do you want to lower all the words?')
+@click.option('--remove_punctuation', '-p', default=False, is_flag=True,
+              help='Do you want to remove all the punctuation?')
+def main(reference, output, reference_file, output_file, alignment, error_type, output_format,
+         to_lower, remove_punctuation):
     """
     Transcription compare tool provided by VoiceGain
     """
@@ -34,11 +38,11 @@ def main(reference, output, reference_file, output_file, alignment, error_type,o
         raise ValueError("One of --output and --output_file must be specified")
 
     if error_type == "CER":
-
         calculator = UKKLevenshteinDistanceCalculator(
             tokenizer=CharacterTokenizer(),
             get_alignment_result=alignment
         )
+
     else:
         calculator = UKKLevenshteinDistanceCalculator(
             tokenizer=WordTokenizer(),
@@ -46,10 +50,12 @@ def main(reference, output, reference_file, output_file, alignment, error_type,o
         )
 
     if output_format == 'TABLE':
-        click.echo(calculator.get_distance(reference, output))
+
+        click.echo(calculator.get_distance(reference, output, to_lower=to_lower, remove_punctuation=remove_punctuation))
 
     if output_format == 'JSON':
-        click.echo(calculator.get_distance(reference, output).to_json())
+
+        click.echo(calculator.get_distance(reference, output, to_lower=to_lower, remove_punctuation=remove_punctuation).to_json())
 
 
 

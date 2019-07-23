@@ -1,6 +1,7 @@
 from .abstract_levenshtein_dsitance_calculator import AbstractLevenshteinDistanceCalculator
 from ..results import Result, AlignmentResult
 from ..ukk_matrix import FKPMatrix, FKPColumn
+from ..utils.digit_util import update_alignment_result
 
 
 class UKKLevenshteinDistanceCalculator(AbstractLevenshteinDistanceCalculator):
@@ -22,6 +23,13 @@ class UKKLevenshteinDistanceCalculator(AbstractLevenshteinDistanceCalculator):
                 alignment_result = self._get_alignment_result(
                     fkp, row, col, s=ref_tokens_list, t=output_tokens_list
                 )
+                ###
+                error_list = alignment_result.get_error_section_list()
+                for e in error_list:
+                    updated_alignment_result = update_alignment_result(e.original_alignment_result)
+                    e.set_correction(updated_alignment_result)
+                alignment_result.apply_error_section_list(error_list)
+                ###
 
                 return Result(distance=distance,
                               is_final=is_final,
