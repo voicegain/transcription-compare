@@ -1,14 +1,14 @@
 from .abstract_levenshtein_dsitance_calculator import AbstractLevenshteinDistanceCalculator
 from ..results import Result, AlignmentResult
 from ..ukk_matrix import FKPMatrix, FKPColumn
-from ..utils.digit_util import update_alignment_result
 
 
 class UKKLevenshteinDistanceCalculator(AbstractLevenshteinDistanceCalculator):
 
-    def __init__(self, tokenizer, threshold=1, get_alignment_result=False):
+    def __init__(self, tokenizer, threshold=1, get_alignment_result=False, digit_util=None):
         super().__init__(tokenizer, get_alignment_result)
         self.threshold = threshold
+        self.digit_util = digit_util
 
     def get_result_from_list(self, ref_tokens_list, output_tokens_list):
         is_final, distance, fkp, row, col = self.ukk_threshold(
@@ -24,14 +24,20 @@ class UKKLevenshteinDistanceCalculator(AbstractLevenshteinDistanceCalculator):
                     fkp, row, col, s=ref_tokens_list, t=output_tokens_list
                 )
                 ###
-                error_list = alignment_result.get_error_section_list()
-                for e in error_list:
-                    updated_alignment_result = update_alignment_result(e.original_alignment_result)
-                    e.set_correction(updated_alignment_result)
-                alignment_result.apply_error_section_list(error_list)
-                ###
+                if self.digit_util is not None:
+                    error_list = alignment_result.get_error_section_list()
+                    for e in error_list:
+                        # print(e.original_alignment_result)
+                        updated_alignment_result = self.digit_util.update_alignment_result(e.original_alignment_result)
+                        if updated_alignment_result is not None:
+                            e.set_correction(updated_alignment_result)
+                    alignment_result.apply_error_section_list(error_list)
 
+                distance, substitution, insertion, deletion = alignment_result.calculate_three_kinds_of_distance()
                 return Result(distance=distance,
+                              substitution=substitution,
+                              deletion=deletion,
+                              insertion=insertion,
                               is_final=is_final,
                               len_ref=len(ref_tokens_list),
                               alignment_result=alignment_result

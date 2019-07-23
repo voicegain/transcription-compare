@@ -3,6 +3,7 @@
 import click
 from transcription_compare.levenshtein_distance_calculator import UKKLevenshteinDistanceCalculator
 from transcription_compare.tokenizer import CharacterTokenizer, WordTokenizer
+from transcription_compare.utils.digit_util import DigitUtil
 
 
 @click.command()
@@ -37,16 +38,20 @@ def main(reference, output, reference_file, output_file, alignment, error_type, 
     else:
         raise ValueError("One of --output and --output_file must be specified")
 
+    digit_util = DigitUtil()
+
     if error_type == "CER":
         calculator = UKKLevenshteinDistanceCalculator(
             tokenizer=CharacterTokenizer(),
-            get_alignment_result=alignment
+            get_alignment_result=alignment,
+            digit_util=digit_util
         )
 
     else:
         calculator = UKKLevenshteinDistanceCalculator(
             tokenizer=WordTokenizer(),
-            get_alignment_result=alignment
+            get_alignment_result=alignment,
+            digit_util=digit_util
         )
 
     if output_format == 'TABLE':
@@ -55,8 +60,8 @@ def main(reference, output, reference_file, output_file, alignment, error_type, 
 
     if output_format == 'JSON':
 
-        click.echo(calculator.get_distance(reference, output, to_lower=to_lower, remove_punctuation=remove_punctuation).to_json())
-
+        click.echo(calculator.get_distance(reference, output, to_lower=to_lower,
+                                           remove_punctuation=remove_punctuation).to_json())
 
 
 if __name__ == '__main__':

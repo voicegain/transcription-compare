@@ -10,7 +10,8 @@ class AbstractLevenshteinDistanceCalculator(ABC):
         self.tokenizer = tokenizer
         self.get_alignment_result = get_alignment_result
 
-    def get_distance(self, ref_tokens: str, output_tokens: str, to_lower: bool, remove_punctuation: bool) -> Result:
+    def get_distance(self, ref_tokens: str, output_tokens: str, to_lower: bool = False,
+                     remove_punctuation: bool = False) -> Result:
 
         return self.get_result_from_list(
             self.tokenizer.tokenize(ref_tokens, to_lower, remove_punctuation),
