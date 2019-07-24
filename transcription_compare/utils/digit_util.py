@@ -78,6 +78,8 @@ class DigitUtil:
                     get_alignment_result=False
                 )
         output_string = alignment_result.get_outputs_str()
+        # original_ref_string = alignment_result.get_reference_str()
+        # print("++++++++++++++++before calculate three in DU")
         old_distance = alignment_result.calculate_three_kinds_of_distance()[0]
         generator = SimpleReferenceCombinationGenerator()
         tmp_result = None
@@ -89,19 +91,24 @@ class DigitUtil:
                     generator.add_new_token_options(r)
             else:
                 generator.add_new_token_options([aligned_tokens_list[index].reference])
-            # print('generator.get_all_reference()', generator.get_all_reference())
-            for x in generator.get_all_reference():
-                x = " ".join(x)
-                distance = calculator.get_distance(x, output_string).distance
-                # print('x', x)
-                # print('output_string', output_string)
-                # print('distance', distance)
 
-                if distance < old_distance:
-                    old_distance = distance
-                    tmp_result = x
+        # print('generator.get_all_reference()', generator.get_all_reference())
+        for x in generator.get_all_reference():
+            x = " ".join(x)
+            distance = calculator.get_distance(x, output_string).distance
+            # print('x', x)
+            # print('output_string', output_string)
+            # print('distance', distance)
+
+            if distance < old_distance:
+                old_distance = distance
+                tmp_result = x
+
         if tmp_result is None:
             return None
+        # else:
+        #     if original_ref_string !=tmp_result:
+        #        print("Update from '{}' to '{}', {}".format(original_ref_string, tmp_result, original_ref_string==tmp_result))
         calculator2 = UKKLevenshteinDistanceCalculator(
             tokenizer=WordTokenizer(),
             get_alignment_result=True

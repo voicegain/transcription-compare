@@ -3,7 +3,8 @@ from transcription_compare.levenshtein_distance_calculator import UKKLevenshtein
 from transcription_compare.tokenizer import CharacterTokenizer, WordTokenizer
 from transcription_compare.results import AlignmentResult
 from transcription_compare.utils import SimpleReferenceCombinationGenerator
-from transcription_compare.utils.digit_util import our_is_digit
+from transcription_compare.utils.digit_util import DigitUtil
+# digit_util = DigitUtil()
 
 
 def update_alignment_result(alignment_result):
@@ -56,6 +57,8 @@ alignment_result = AlignmentResult()
 alignment_result.add_token(ref_token="w", output_tokens=["w"], add_to_left=False)
 alignment_result.add_token(ref_token="5", output_tokens=["e"], add_to_left=False)
 alignment_result.add_token(ref_token="r", output_tokens=["r"], add_to_left=False)
+alignment_result.add_token(ref_token="g", output_tokens=[], add_to_left=False)
+alignment_result.add_token(ref_token="2", output_tokens=[], add_to_left=False)
 alignment_result.add_token("1", ["one"])
 
 alignment_result.add_token("21", ["twenty-one", 'a', 'c'], add_to_left=False)

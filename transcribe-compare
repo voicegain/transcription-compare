@@ -43,8 +43,7 @@ def main(reference, output, reference_file, output_file, alignment, error_type, 
     if error_type == "CER":
         calculator = UKKLevenshteinDistanceCalculator(
             tokenizer=CharacterTokenizer(),
-            get_alignment_result=alignment,
-            digit_util=digit_util
+            get_alignment_result=alignment
         )
 
     else:

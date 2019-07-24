@@ -18,5 +18,5 @@ class CharacterTokenizer(AbstractTokenizer):
 
         if to_lower is True:
             token_string = token_string.lower()
-
+        # print('list(token_string)', len(list(token_string)))
         return list(token_string)

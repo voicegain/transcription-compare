@@ -17,5 +17,5 @@ class WordTokenizer(AbstractTokenizer):
 
         if to_lower is True:
             token_string = token_string.lower()
-
+        # print('token_string.split()',len(token_string.split()))
         return token_string.split()

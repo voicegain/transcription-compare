@@ -23,16 +23,18 @@ class UKKLevenshteinDistanceCalculator(AbstractLevenshteinDistanceCalculator):
                 alignment_result = self._get_alignment_result(
                     fkp, row, col, s=ref_tokens_list, t=output_tokens_list
                 )
-
                 if self.digit_util is not None:
                     error_list = alignment_result.get_error_section_list()
                     for e in error_list:
+                        # print("!!!!!!!!!!!!!!!!!!!!!!!")
                         # print(e.original_alignment_result)
                         updated_alignment_result = self.digit_util.update_alignment_result(e.original_alignment_result)
                         if updated_alignment_result is not None:
+                            # print(">>>>>>>>>>>>>not None")
+                            # print(updated_alignment_result)
                             e.set_correction(updated_alignment_result)
                     alignment_result.apply_error_section_list(error_list)
-
+                # print(">>>>>>>>>before calculate three")
                 distance, substitution, insertion, deletion = alignment_result.calculate_three_kinds_of_distance()
                 return Result(distance=distance,
                               substitution=substitution,

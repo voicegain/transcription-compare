@@ -149,6 +149,11 @@ class AlignmentResult:
                 extend_output_token_to_left=True
             )
 
+        # handle the case that reference is empty
+        for token in new_aligned_token_list:
+            if token.reference is None:
+                token.reference = ""
+
         self.aligned_tokens_list = new_aligned_token_list
 
     def __eq__(self, other):
@@ -175,7 +180,12 @@ class AlignmentResult:
                 if len(aligned_token.outputs) == 0:
                     deletion += 1
                 elif len(aligned_token.outputs) > 1:
-                    insertion += len(aligned_token.outputs)-1
+                    if aligned_token.reference == '':
+                        insertion += len(aligned_token.outputs)
+                    else:
+                        insertion += len(aligned_token.outputs) - 1
+                        if aligned_token.reference not in aligned_token.outputs:
+                             substitution += 1
                 else:
                     substitution += 1
         distance = substitution + insertion + deletion
