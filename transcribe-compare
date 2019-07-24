@@ -11,12 +11,13 @@ from transcription_compare.utils.digit_util import DigitUtil
 @click.option('--output', '-o',  type=str, help='target string')
 @click.option('--reference_file', '-R', type=click.File('r'), help='source file path')
 @click.option('--output_file', '-O', type=click.File('r'), help='target file path')
-@click.option('--alignment', '-a', default=False, is_flag=True, help='Do you want to see the alignment result?')
+@click.option('--alignment', '-a', default=False, is_flag=True,
+              help='Do you want to see the alignment result? True/False')
 @click.option('--error_type', '-e', default='CER', type=click.Choice(['CER', 'WER']))
 @click.option('--output_format', '-j', default='TABLE', type=click.Choice(['JSON', 'TABLE']))
-@click.option('--to_lower', '-l', default=False, is_flag=True, help='Do you want to lower all the words?')
+@click.option('--to_lower', '-l', default=False, is_flag=True, help='Do you want to lower all the words? True/False')
 @click.option('--remove_punctuation', '-p', default=False, is_flag=True,
-              help='Do you want to remove all the punctuation?')
+              help='Do you want to remove all the punctuation? True/False')
 def main(reference, output, reference_file, output_file, alignment, error_type, output_format,
          to_lower, remove_punctuation):
     """

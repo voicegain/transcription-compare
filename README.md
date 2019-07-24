@@ -17,8 +17,13 @@ Options:
   -R, --reference_file FILENAME   source file path
   -O, --output_file FILENAME      target file path
   -a, --alignment                 Do you want to see the alignment result?
+                                  True/False
   -e, --error_type [CER|WER]
   -j, --output_format [JSON|TABLE]
+  -l, --to_lower                  Do you want to lower all the words?
+                                  True/False
+  -p, --remove_punctuation        Do you want to remove all the punctuation?
+                                  True/False
   --help                          Show this message and exit.
 ```
 
