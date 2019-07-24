@@ -28,6 +28,12 @@ Options:
 + inflect
 + re
 
+# Sample Commands
+
+```
+python transcribe-compare -R sample_data/The_Princess_and_the_Pea-reference.txt -O sample_data/The_Princess_and_the_Pea-output-1.txt -e CER
+```
+
 ## Acknowledgements
 
 Contributed by [VoiceGain](https://www.voicegain.ai).

@@ -25,6 +25,18 @@
             "env": {
                 "PYTHONPATH": "${workspaceFolder}"
             }
+        },
+        {
+            "name": "Python: transcribe-compare - Princess and the Pea",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/transcribe-compare",
+            "args": ["-R", "sample_data/The_Princess_and_the_Pea-reference.txt", "-O", "sample_data/The_Princess_and_the_Pea-output-1.txt", "-a", "-e", "CER"],
+            "console": "externalTerminal",
+            "pythonPath": "${config:python.pythonPath}",
+            "env": {
+                "PYTHONPATH": "${workspaceFolder}"
+            }
         }
     ]
 }
