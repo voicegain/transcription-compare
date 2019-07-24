@@ -1,7 +1,7 @@
 from .abstract_levenshtein_dsitance_calculator import AbstractLevenshteinDistanceCalculator
 from ..results import Result, AlignmentResult
 from ..ukk_matrix import FKPMatrix, FKPColumn
-
+import matplotlib.pyplot as plt
 
 class UKKLevenshteinDistanceCalculator(AbstractLevenshteinDistanceCalculator):
 
@@ -36,6 +36,36 @@ class UKKLevenshteinDistanceCalculator(AbstractLevenshteinDistanceCalculator):
                     alignment_result.apply_error_section_list(error_list)
                 # print(">>>>>>>>>before calculate three")
                 distance, substitution, insertion, deletion = alignment_result.calculate_three_kinds_of_distance()
+
+
+                # plt.plot(i_list, distance_list, 'ro')
+                # plt.axis(i_list)
+                # plt.show()
+                print('list', alignment_result.window(10, 10))
+                width = 500
+                step = 200
+                output_list, i_list, distance_list, substitution_list, deletion_list, insertion_list = alignment_result.window(width, step)
+                print('distance', distance_list)
+                print('deletion_list', deletion_list)
+                print('insertion_list', insertion_list)
+                plt.figure()
+                l1 = plt.plot(i_list, distance_list, 'r--', label='distance')
+                l2 = plt.plot(i_list, substitution_list, 'b--', label='substitution')
+                l3 = plt.plot(i_list, deletion_list, 'g--', label='deletion')
+                l4 = plt.plot(i_list, insertion_list, 'm--', label='insertion')
+                plt.plot(i_list, distance_list, 'ro')
+                plt.xlabel("step")
+                plt.ylabel("distance")
+                plt.legend()
+                plt.title("{}distance per step {}width{} ".format('Princess_pea', step, width))
+                plt.savefig("{}distance_per_step{}width{}.png".format('Princess_pea', step, width))
+                # plt.show()
+
+                print('sum', sum(distance_list))
+                print('substitution_list', sum(substitution_list))
+                print('deletion_list', sum(deletion_list))
+                print('insertion_list', sum(insertion_list))
+                print('--------------------------')
                 return Result(distance=distance,
                               substitution=substitution,
                               deletion=deletion,
