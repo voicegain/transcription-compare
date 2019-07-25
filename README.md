@@ -24,8 +24,11 @@ Options:
                                   True/False
   -p, --remove_punctuation        Do you want to remove all the punctuation?
                                   True/False
+  -P, --to_save_plot              Do you want to see the windows? True/False
+  -s, --to_edit_step INTEGER      Please enter the step
+  -w, --to_edit_width INTEGER     Please enter the width
   --help                          Show this message and exit.
-```
+  ```
 
 ## Dependencies
 
