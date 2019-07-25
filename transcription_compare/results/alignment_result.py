@@ -100,6 +100,58 @@ class AlignmentResult:
             json_list.append(aligned_token.to_json())
         return json_list
 
+    def to_html(self):
+        message = """<html>
+         <head>
+         <style>
+         table {
+           font-family: arial, sans-serif;
+           border-collapse: collapse;
+           width: 100%;
+         }
+
+         td, th {
+           border: 1px solid #dddddd;
+           text-align: left;
+           padding: 8px;
+         }
+
+         </style>
+         </head>
+         <body>
+
+         <h2>transcription-compare Table</h2>
+
+         <table>
+           <tr>
+             <th>Reference</th>
+             <th>Output</th>
+             <th>distance</th>
+             <th>substitution</th>
+             <th>insertion</th>
+             <th>deletion</th>
+           </tr> """
+        all_substitution = 0
+        all_insertion = 0
+        all_deletion = 0
+        all_distance = 0
+        for aligned_token in self.aligned_tokens_list:
+            message_single, substitution, insertion, deletion = aligned_token.to_html()
+            # message += aligned_token.to_html()
+            message += message_single
+            all_substitution += substitution
+            all_insertion += insertion
+            all_deletion += deletion
+            all_distance += substitution + insertion + deletion
+            # print(message)
+        message += '\n<tr>\n<td colspan="2">' + 'total' + '</td>'
+        message += '\n<td>' + str(all_distance) + '</td>'
+        message += '\n<td>' + str(all_substitution) + '</td>'
+        message += '\n<td>' + str(all_insertion) + '</td>'
+        message += '\n<td>' + str(all_deletion) + '</td>\n</tr>'
+        message += '\n</body>\n</html>'
+        return message
+
     def __str__(self):
         return self.to_pretty_str()
 
@@ -175,20 +227,14 @@ class AlignmentResult:
         substitution = 0
         insertion = 0
         deletion = 0
+        distance = 0
         for aligned_token in self.aligned_tokens_list:
-            if not aligned_token.match():
-                if len(aligned_token.outputs) == 0:
-                    deletion += 1
-                elif len(aligned_token.outputs) > 1:
-                    if aligned_token.reference == '':
-                        insertion += len(aligned_token.outputs)
-                    else:
-                        insertion += len(aligned_token.outputs) - 1
-                        if aligned_token.reference not in aligned_token.outputs:
-                            substitution += 1
-                else:
-                    substitution += 1
-        distance = substitution + insertion + deletion
+            tmp_distance, tmp_substitution, tmp_insertion, tmp_deletion \
+                = aligned_token.calculate_three_kinds_of_distance()
+            substitution += tmp_substitution
+            insertion += tmp_insertion
+            deletion += tmp_deletion
+            distance += tmp_distance
         return distance, substitution, insertion, deletion
 
     def get_error_section_list(self):
@@ -250,8 +296,6 @@ class AlignmentResult:
         return output_list
 
 
-
-
 class AlignedToken:
     """
     (reference, output) token pair
@@ -270,6 +314,33 @@ class AlignedToken:
             "ref": self.reference,
             "out": self.outputs
         }
+
+    def to_html(self):
+        """
+        Return str representation of an alignedToken
+        <reference_token>, [<output_token>]
+        :return:
+        """
+
+        distance, substitution, insertion, deletion = self.calculate_three_kinds_of_distance()
+
+        if deletion > 0:# blue
+            message = '\n<tr bgcolor=#00c3ff>\n<td>' + self.reference + '</td>'
+        elif substitution > 0 and insertion == 0:#yellow
+            message = '\n<tr bgcolor="#f7fb00">\n<td>' + self.reference + '</td>'
+        elif substitution > 0 and insertion > 0: # orange
+            message = '\n<tr bgcolor="#fb7900">\n<td>' + self.reference + '</td>'
+        elif substitution == 0 and insertion > 0:  # red
+            message = '\n<tr bgcolor=#fb0000>\n<td>' + self.reference + '</td>'
+        else:
+            message = '\n<tr>\n<td>' + self.reference + '</td>'
+        message += '\n<td>' + " ".join(self.outputs) + '</td>'
+        message += '\n<td>' + str(distance) + '</td>'
+        message += '\n<td>' + str(substitution) + '</td>'
+        message += '\n<td>' + str(insertion) + '</td>'
+        message += '\n<td>' + str(deletion) + '</td>\n</tr>'
+
+        return message, substitution, insertion, deletion
 
     def __str__(self):
         return json.dumps(self.to_json())
@@ -297,6 +368,25 @@ class AlignedToken:
             if self.reference == self.outputs[0]:
                 return True
         return False
+
+    def calculate_three_kinds_of_distance(self):
+        substitution = 0
+        insertion = 0
+        deletion = 0
+        if not self.match():
+            if len(self.outputs) == 0:
+                deletion += 1
+            elif len(self.outputs) > 1:
+                if self.reference == '':
+                    insertion += len(self.outputs)
+                else:
+                    insertion += len(self.outputs) - 1
+                    if self.reference not in self.outputs:
+                        substitution += 1
+            else:
+                substitution += 1
+        distance = substitution + insertion + deletion
+        return distance, substitution, insertion, deletion
 
 
 class AlignmentResultErrorSectionList:

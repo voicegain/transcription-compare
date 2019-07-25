@@ -16,7 +16,8 @@ from transcription_compare.utils.plot_util import plot_alignment_result
 @click.option('--alignment', '-a', default=False, is_flag=True,
               help='Do you want to see the alignment result? True/False')
 @click.option('--error_type', '-e', default='CER', type=click.Choice(['CER', 'WER']))
-@click.option('--output_format', '-j', default='TABLE', type=click.Choice(['JSON', 'TABLE']))
+@click.option('--output_format', '-j', default='TABLE',
+              type=click.Choice(['JSON', 'TABLE', 'HTML']))
 @click.option('--to_lower', '-l', default=False, is_flag=True, help='Do you want to lower all the words? True/False')
 @click.option('--remove_punctuation', '-p', default=False, is_flag=True,
               help='Do you want to remove all the punctuation? True/False')
@@ -79,6 +80,9 @@ def main(reference, output, reference_file, output_file, alignment, error_type, 
     elif output_format == 'JSON':
         result = calculator.get_distance(reference, output, to_lower=to_lower,
                                          remove_punctuation=remove_punctuation).to_json()
+    elif output_format == 'HTML':
+        result = calculator.get_distance(reference, output, to_lower=to_lower,
+                                         remove_punctuation=remove_punctuation).to_html()
     else:
         raise ValueError("Unsupported output format {}".format(output_format))
     click.echo(result)
