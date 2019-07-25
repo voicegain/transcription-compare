@@ -237,30 +237,19 @@ class AlignmentResult:
         output_aligned_tokens_list += self.aligned_tokens_list[start_ind:]
         self.aligned_tokens_list = output_aligned_tokens_list
 
-    def window(self, width, step):  # -> List[AlignmentResult]
+    def window(self, step, width):  # -> List[AlignmentResult]
         output_list = list()
-        i_list = list()
-        distance_list = list()
-        substitution_list = list()
-        deletion_list = list()
-        insertion_list = list()
-        count = 0
+
+        print('step', step)
+        if width >= len(self.aligned_tokens_list):
+            return [self]
+
         for i in range(0, len(self.aligned_tokens_list), step):
-            # print(i, i+width)
-            output_list.append(AlignmentResult(self.aligned_tokens_list[i:i+width]))
-            i_list.append(i)
-            distance_list.append(output_list[count].calculate_three_kinds_of_distance()[0])
-            substitution_list.append(output_list[count].calculate_three_kinds_of_distance()[1])
-            deletion_list.append(output_list[count].calculate_three_kinds_of_distance()[2])
-            insertion_list.append(output_list[count].calculate_three_kinds_of_distance()[3])
-            # print(count)
-            count += 1
-        # axis_list = list(set(i_list))
-        # axis_list.sort()
-        # y_list = list(set(distance_list))
-        # y_list.sort()
-        # axis_list = axis_list+y_list
-        return output_list, i_list, distance_list, substitution_list, deletion_list, insertion_list
+            if i+width <= len(self.aligned_tokens_list):
+                output_list.append(AlignmentResult(self.aligned_tokens_list[i:i+width]))
+        return output_list
+
+
 
 
 class AlignedToken:
