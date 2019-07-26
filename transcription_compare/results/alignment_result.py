@@ -180,6 +180,8 @@ class AlignmentResult:
         """
         merge all alignedToken whose reference is None into their neighborhood
         If possible, they are preferred to be merged into the token before it.
+        # TODO: might move it out of this method
+        Also move mistakes around to increase the number of lines that correct
         :return:
         """
         new_aligned_token_list = []
@@ -207,6 +209,22 @@ class AlignmentResult:
                 token.reference = ""
 
         self.aligned_tokens_list = new_aligned_token_list
+
+        for i in range(1, len(self.aligned_tokens_list)):
+            if (not self.aligned_tokens_list[i].match()) and (not self.aligned_tokens_list[i-1].match()):
+                # print(self.aligned_tokens_list[i-1].reference)
+                # print(self.aligned_tokens_list[i - 1].outputs[1:])
+                if len(self.aligned_tokens_list[i-1].outputs) > 0 and self.aligned_tokens_list[i-1].reference == self.aligned_tokens_list[i-1].outputs[0]:
+                    self.aligned_tokens_list[i].extend_output_tokens(
+                                                output_tokens=self.aligned_tokens_list[i-1].outputs[1:],
+                                                extend_output_token_to_left=True
+                                            )
+                    self.aligned_tokens_list[i-1].outputs = [self.aligned_tokens_list[i-1].outputs[0]]
+                    # print('r', self.aligned_tokens_list[i - 1].reference,
+                    # 'o', self.aligned_tokens_list[i - 1].outputs)
+                    # print('ri', self.aligned_tokens_list[i].reference, 'oi', self.aligned_tokens_list[i].outputs)
+
+
 
     def __eq__(self, other):
         # not the same instance

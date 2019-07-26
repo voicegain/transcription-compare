@@ -22,10 +22,10 @@ def t(distance_list, to_edit_step, to_edit_width):
 
     plt.axvline(mean_distance, color='lightcoral', linestyle=":", alpha=2)
     plt.text(mean_distance + 2, 0.012, 'distance mean: %.1fcm' % (mean_distance), color='indianred')
-    plt.annotate(s='We are using The Shapiro-Wilk test'.format(p), xy=(max(distance_list) - 3, 0.055))
-    plt.annotate(s='p_value{} '.format(p), xy=(max(distance_list) - 3, 0.05))
-    plt.annotate(s='w{} '.format(w), xy=(max(distance_list) - 3, 0.045))
-    plt.annotate(s='the closer of w to 1,\n the better the normal distribution fits', xy=(max(distance_list) - 3, 0.04))
+    plt.annotate(s='We are using The Shapiro-Wilk test'.format(p), xy=(max(distance_list) - 3, 0.03))
+    plt.annotate(s='p_value{} '.format(p), xy=(max(distance_list) - 3, 0.25))
+    plt.annotate(s='w{} '.format(w), xy=(max(distance_list) - 3, 0.15))
+    # plt.annotate(s='the closer of w to 1,\n the better the normal distribution fits', xy=(max(distance_list) - 3, 0.04))
     if p > 0.05:
         plt.annotate(s='it is a normal distribution', xy=(max(distance_list) - 3, 0.035))
     plt.grid(linestyle='--')
