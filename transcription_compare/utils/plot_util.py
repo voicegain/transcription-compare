@@ -30,7 +30,7 @@ def t(distance_list, to_edit_step, to_edit_width):
         plt.annotate(s='it is a normal distribution', xy=(max(distance_list) - 3, 0.035))
     plt.grid(linestyle='--')
     plt.title("distribution_of_distance step{} width{}".format(to_edit_step, to_edit_width))
-    plt.savefig("distribution_of_distance")
+    plt.savefig("sample_data/distribution_of_distance")
 
 
 def plot_alignment_result(alignment_result, to_edit_width, to_edit_step, file_name, file_path):
