@@ -28,7 +28,8 @@ class UKKLevenshteinDistanceCalculator(AbstractLevenshteinDistanceCalculator):
                     for e in error_list:
                         # print("!!!!!!!!!!!!!!!!!!!!!!!")
                         # print(e.original_alignment_result)
-                        updated_alignment_result = self.digit_util.update_alignment_result(e.original_alignment_result)
+                        updated_alignment_result = self.digit_util.update_alignment_result(
+                            e.original_alignment_result)
                         if updated_alignment_result is not None:
                             # print(">>>>>>>>>>>>>not None")
                             # print(updated_alignment_result)
@@ -36,6 +37,7 @@ class UKKLevenshteinDistanceCalculator(AbstractLevenshteinDistanceCalculator):
                     alignment_result.apply_error_section_list(error_list)
                 # print(">>>>>>>>>before calculate three")
                 distance, substitution, insertion, deletion = alignment_result.calculate_three_kinds_of_distance()
+
                 return Result(distance=distance,
                               substitution=substitution,
                               deletion=deletion,

@@ -27,6 +27,14 @@ class Result:
             "alignment_result": self.alignment_result.to_json()
         }
 
+    def to_html(self):
+        gen_html = "transcription-compare.html"
+        f = open(gen_html, 'w')
+
+        f.write(self.alignment_result.to_html())
+        f.close()
+        return f
+
     def __str__(self):
         return "distance: {}\nsubstitution: {}\ninsertion: {}\ndeletion: {}" \
                "\nerror rate: {}\nis_final: {}\nalignment_result:\n{}".format(

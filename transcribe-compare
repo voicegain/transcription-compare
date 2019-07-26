@@ -4,6 +4,8 @@ import click
 from transcription_compare.levenshtein_distance_calculator import UKKLevenshteinDistanceCalculator
 from transcription_compare.tokenizer import CharacterTokenizer, WordTokenizer
 from transcription_compare.utils.digit_util import DigitUtil
+import os
+from transcription_compare.utils.plot_util import plot_alignment_result
 
 
 @click.command()
@@ -14,31 +16,48 @@ from transcription_compare.utils.digit_util import DigitUtil
 @click.option('--alignment', '-a', default=False, is_flag=True,
               help='Do you want to see the alignment result? True/False')
 @click.option('--error_type', '-e', default='CER', type=click.Choice(['CER', 'WER']))
-@click.option('--output_format', '-j', default='TABLE', type=click.Choice(['JSON', 'TABLE']))
+@click.option('--output_format', '-j', default='TABLE',
+              type=click.Choice(['JSON', 'TABLE', 'HTML']))
 @click.option('--to_lower', '-l', default=False, is_flag=True, help='Do you want to lower all the words? True/False')
 @click.option('--remove_punctuation', '-p', default=False, is_flag=True,
               help='Do you want to remove all the punctuation? True/False')
-def main(reference, output, reference_file, output_file, alignment, error_type, output_format,
-         to_lower, remove_punctuation):
+@click.option('--to_save_plot', '-P', default=False, is_flag=True, help='Do you want to see the windows? True/False')
+@click.option('--to_edit_step', '-s', type=int, default=500, help='Please enter the step')
+@click.option('--to_edit_width', '-w', type=int, default=500, help='Please enter the width')
+def main(reference, output, reference_file, output_file, alignment, error_type, output_format, to_lower,
+         remove_punctuation, to_save_plot, to_edit_step, to_edit_width):
     """
     Transcription compare tool provided by VoiceGain
     """
     if reference is not None:
         reference = reference
+        reference_file_name = "reference"
     elif reference_file is not None:
         # with open(reference_file, 'r') as file1:
+        # print(reference_file)
+        # print(str(reference_file)[5:10])
+
+        reference_file_name = os.path.basename(reference_file.name)
+        # print('split', str(reference_file).split(" ")[1].split("\\")[-1].split(".")[0])
         reference = reference_file.read()
+
     else:
         raise ValueError("One of --reference and --reference_file must be specified")
 
     if output is not None:
         output = output
+        output_file_name = "output"
     elif output_file is not None:
         # with open(output_file, 'r') as file2:
+        output_file_name = os.path.basename(output_file.name)
+
+        # print('split', str(output_file).split(" ")[1].split("\\")[-1].split(".")[0])
+        # output_file_name = output_file.split("/")[-1]
         output = output_file.read()
     else:
         raise ValueError("One of --output and --output_file must be specified")
 
+    file_name = reference_file_name + '_' + output_file_name
     digit_util = DigitUtil()
 
     if error_type == "CER":
@@ -55,13 +74,21 @@ def main(reference, output, reference_file, output_file, alignment, error_type, 
         )
 
     if output_format == 'TABLE':
+        result = calculator.get_distance(reference, output, to_lower=to_lower,
+                                         remove_punctuation=remove_punctuation)
 
-        click.echo(calculator.get_distance(reference, output, to_lower=to_lower, remove_punctuation=remove_punctuation))
+    elif output_format == 'JSON':
+        result = calculator.get_distance(reference, output, to_lower=to_lower,
+                                         remove_punctuation=remove_punctuation).to_json()
+    elif output_format == 'HTML':
+        result = calculator.get_distance(reference, output, to_lower=to_lower,
+                                         remove_punctuation=remove_punctuation).to_html()
+    else:
+        raise ValueError("Unsupported output format {}".format(output_format))
+    click.echo(result)
 
-    if output_format == 'JSON':
-
-        click.echo(calculator.get_distance(reference, output, to_lower=to_lower,
-                                           remove_punctuation=remove_punctuation).to_json())
+    if to_save_plot is True:
+        plot_alignment_result(result.alignment_result, to_edit_width, to_edit_step, file_name)
 
 
 if __name__ == '__main__':
