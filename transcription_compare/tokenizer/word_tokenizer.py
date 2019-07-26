@@ -1,5 +1,4 @@
 from .abstract_tokenizer import AbstractTokenizer
-import string
 
 
 class WordTokenizer(AbstractTokenizer):
@@ -13,7 +12,8 @@ class WordTokenizer(AbstractTokenizer):
         :return:split token_string
         """
         if remove_punctuation is True:
-            token_string = token_string.translate(str.maketrans('', '', string.punctuation))
+            punctuation = r"""!"#$%&()*+,-./:;<=>?@[\]^_`{|}~"""
+            token_string = token_string.translate(str.maketrans('', '', punctuation))
 
         if to_lower is True:
             token_string = token_string.lower()

@@ -1,12 +1,19 @@
 import matplotlib.pyplot as plt
+import os
 
 
-def plot_alignment_result(alignment_result, to_edit_width, to_edit_step, file_name):
+def t(distance_list):
+    pass
+
+
+def plot_alignment_result(alignment_result, to_edit_width, to_edit_step, file_name, file_path):
     output_list = alignment_result.window(
         width=to_edit_width,
         step=to_edit_step)
     i_list, distance_list, substitution_list, deletion_list, insertion_list = \
         _prepare_plot(output_list, to_edit_step)
+
+    t(distance_list)
 
     print('distance', distance_list)
     print('deletion_list', deletion_list)
@@ -23,7 +30,11 @@ def plot_alignment_result(alignment_result, to_edit_width, to_edit_step, file_na
     plt.title("{}distance per step".format(file_name),
               fontsize='x-small')
     # font_size=['xx-small', 'x-small', 'small', 'medium', 'large','x-large', 'xx-large']
-    plt.savefig("{}distance_per_step{}width{}.png".format(file_name, to_edit_step, to_edit_width))
+    name = "{}distance_per_step{}width{}.png".format(file_name, to_edit_step, to_edit_width)
+    if file_path is not None:
+        plt.savefig(os.path.join(file_path, name))
+    else:
+        plt.savefig(name)
     # plt.show()
 
     print('sum', sum(distance_list))
