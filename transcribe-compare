@@ -123,9 +123,9 @@ def main(reference, output, reference_file, output_file, alignment, error_type, 
         for (k, v) in output_results.items():
             alignment_results.append(v.alignment_result)
             sub_plot_name.append(k)
-        # plot_alignment_result(alignment_results, to_edit_width, to_edit_step, sub_plot_name, file_path)
-        plot_alignment_result_density(alignment_results, to_edit_width, to_edit_step, sub_plot_name,
-                                      file_path)
+        plot_alignment_result(alignment_results, to_edit_width, to_edit_step, sub_plot_name, file_path)
+        # plot_alignment_result_density(alignment_results, to_edit_width, to_edit_step, sub_plot_name,
+        #                               file_path)
 
 
 if __name__ == '__main__':
