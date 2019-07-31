@@ -1,5 +1,6 @@
 from typing import List
 import json
+from ..utils.html_color import create_bg_color
 
 
 class AlignmentResult:
@@ -102,35 +103,31 @@ class AlignmentResult:
 
     def to_html(self):
         message = """<html>
-         <head>
-         <style>
-         table {
-           font-family: arial, sans-serif;
-           border-collapse: collapse;
-           width: 100%;
-         }
-
-         td, th {
-           border: 1px solid #dddddd;
-           text-align: left;
-           padding: 8px;
-         }
-
-         </style>
-         </head>
-         <body>
-
-         <h2>transcription-compare Table</h2>
-
-         <table>
-           <tr>
-             <th>Reference</th>
-             <th>Output</th>
-             <th>distance</th>
-             <th>substitution</th>
-             <th>insertion</th>
-             <th>deletion</th>
-           </tr> """
+            <head>
+            <style>
+            table {
+              font-family: arial, sans-serif;
+              border-collapse: collapse;
+              width: 100%;
+            }
+            td, th {
+              border: 1px solid #dddddd;
+              text-align: left;
+              padding: 8px;
+            }
+            </style>
+            </head>
+            <body>
+            <h2>transcription-compare Table</h2>
+            <table>
+              <tr>
+                <th>Reference</th>
+                <th>Output</th>
+                <th>distance</th>
+                <th>substitution</th>
+                <th>insertion</th>
+                <th>deletion</th>
+              </tr> """
         all_substitution = 0
         all_insertion = 0
         all_deletion = 0
@@ -223,8 +220,6 @@ class AlignmentResult:
                     # print('r', self.aligned_tokens_list[i - 1].reference,
                     # 'o', self.aligned_tokens_list[i - 1].outputs)
                     # print('ri', self.aligned_tokens_list[i].reference, 'oi', self.aligned_tokens_list[i].outputs)
-
-
 
     def __eq__(self, other):
         # not the same instance
@@ -342,16 +337,20 @@ class AlignedToken:
 
         distance, substitution, insertion, deletion = self.calculate_three_kinds_of_distance()
 
-        if deletion > 0:# blue
-            message = '\n<tr bgcolor=#00c3ff>\n<td>' + self.reference + '</td>'
-        elif substitution > 0 and insertion == 0:#yellow
-            message = '\n<tr bgcolor="#f7fb00">\n<td>' + self.reference + '</td>'
-        elif substitution > 0 and insertion > 0: # orange
-            message = '\n<tr bgcolor="#fb7900">\n<td>' + self.reference + '</td>'
-        elif substitution == 0 and insertion > 0:  # red
-            message = '\n<tr bgcolor=#fb0000>\n<td>' + self.reference + '</td>'
-        else:
-            message = '\n<tr>\n<td>' + self.reference + '</td>'
+        message = '\n<tr {}>\n<td>'.format(
+            create_bg_color(substitution, insertion, deletion)
+        ) + self.reference + '</td>'
+
+        # if deletion > 0:# blue
+        #     message = '\n<tr bgcolor=#00c3ff>\n<td>' + self.reference + '</td>'
+        # elif substitution > 0 and insertion == 0:#yellow
+        #     message = '\n<tr bgcolor="#f7fb00">\n<td>' + self.reference + '</td>'
+        # elif substitution > 0 and insertion > 0: # orange
+        #     message = '\n<tr bgcolor="#fb7900">\n<td>' + self.reference + '</td>'
+        # elif substitution == 0 and insertion > 0:  # red
+        #     message = '\n<tr bgcolor=#fb0000>\n<td>' + self.reference + '</td>'
+        # else:
+        #     message = '\n<tr>\n<td>' + self.reference + '</td>'
         message += '\n<td>' + " ".join(self.outputs) + '</td>'
         message += '\n<td>' + str(distance) + '</td>'
         message += '\n<td>' + str(substitution) + '</td>'
