@@ -1,7 +1,5 @@
 import matplotlib.pyplot as plt
 import os
-import pandas as pd
-import numpy as np
 import seaborn as sns
 from scipy.stats import *
 import scipy.stats as stats
@@ -64,7 +62,6 @@ def plot_density_detail(count, alignment_result, to_edit_step, to_edit_width, fi
 
 
 def plot_distance_detail(count, alignment_result, to_edit_width, to_edit_step, file_name):
-    print('count', count)
     output_list = alignment_result.window(
         width=to_edit_width,
         step=to_edit_step)
@@ -93,6 +90,34 @@ def plot_alignment_result(alignment_results, to_edit_width, to_edit_step, file_n
         plot_distance_detail(count+1, single_alignment_result, to_edit_width, to_edit_step, file_name[count])
 
     name = "{}distance {}width{}.png".format('distance_plot', to_edit_step, to_edit_width)
+    if file_path is not None:
+        plt.savefig(os.path.join(file_path, name))
+    else:
+        plt.savefig(name)
+
+
+def plot_alignment_result_only_distance(alignment_results, to_edit_width, to_edit_step, file_name, file_path):
+    plt.figure()
+    color_line_style_list = ['r--', 'b--', 'g--', 'm--', 'c--', 'y--', 'k--', 'w--',
+                             'r-.', 'b-.', 'g-.', 'm-.', 'c-.', 'y-.', 'k-.', 'w-.',
+                             'r:', 'b:', 'g:', 'm:', 'c:', 'y:', 'k:', 'w:']
+    # we only support eight comparison but it is enough right?
+    for (count, single_alignment_result) in enumerate(alignment_results):
+        # print('color_line[count]', color_line_style_list[count])
+        output_list = single_alignment_result.window(
+            width=to_edit_width,
+            step=to_edit_step)
+        i_list, distance_list, _, _, _ = \
+            _prepare_plot(output_list, to_edit_step)
+        plt.plot(i_list, distance_list, color_line_style_list[count], label=format(file_name[count]))
+        plt.plot(i_list, distance_list, 'ro')
+
+    plt.xlabel("step{} width{}".format(to_edit_step, to_edit_width))
+    plt.ylabel("distance")
+    plt.legend()
+    plt.title("distance per step",
+              fontsize='medium')
+    name = "distance_difference_plot {}width{}.png".format(to_edit_step, to_edit_width)
     if file_path is not None:
         plt.savefig(os.path.join(file_path, name))
     else:

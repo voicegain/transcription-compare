@@ -96,6 +96,7 @@ class MultiResult:
             <tbody>
                """
         for identifier in self.identifiers:
+            print('identifiers', identifier)
             body += """<tr><td>{}</td></tr>""".format(identifier)
         body += """</tbody>
                 </table>
@@ -119,7 +120,7 @@ class MultiResult:
         identifiers = []
         for identifier in self.identifiers:
             identifiers.append(identifier)
-
+        print('identifiers', identifiers)
         return {
             "distance": self.distance,
             "error_rate": self.error_rate,
@@ -185,8 +186,8 @@ class MultiAlignmentResult:
                 <th>insertion</th>
                 <th>deletion</th></tr><tbody>"""
         # create header
-        for t in self.multi_alignment_tokens:
-            body += t.to_html()
+        for c, t in enumerate(self.multi_alignment_tokens):
+            body += t.to_html(c)
         # something else
         body += '\n</tbody>\n</table>'
         return body
@@ -235,9 +236,8 @@ class MultiAlignedToken:
                     self.deletion.append(deletion)
                     self.output.append(aligned_token.outputs)
                     # print('!!!!self.output', self.output)
-        print('lalalalal   self.output',self.output)
 
-    def to_html(self):
+    def to_html(self, c):
         """
         one row
         Example output string:
@@ -265,10 +265,16 @@ class MultiAlignedToken:
           </tr>
         :return:
         """
-        message = '\n<tr>\n<td rowspan="{}">'.format(len(self.output)) + self.reference + '</td>'
+        if (c % 2) == 0:
+            message = '\n<tr bgcolor=#dddddd >\n<td rowspan="{}">'.format(len(self.output)) + self.reference + '</td>'
+        else:
+            message = '\n<tr>\n<td rowspan="{}">'.format(len(self.output)) + self.reference + '</td>'
         for i in range(len(self.output)):
             if i != 0:
-                message += '\n<tr>'
+                if (c % 2) == 0:
+                    message += '\n<tr bgcolor=#dddddd>'
+                else:
+                    message += '\n<tr>'
             message += '\n<td {}>'.format(
                 create_bg_color(self.substitution[i], self.insertion[i], self.deletion[i])
             ) + " ".join(self.output[i]) + '</td>'

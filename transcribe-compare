@@ -5,7 +5,7 @@ from transcription_compare.levenshtein_distance_calculator import UKKLevenshtein
 from transcription_compare.tokenizer import CharacterTokenizer, WordTokenizer
 from transcription_compare.utils.digit_util import DigitUtil
 import os
-from transcription_compare.utils.plot_util import plot_alignment_result, plot_alignment_result_density
+from transcription_compare.utils.plot_util import plot_alignment_result, plot_alignment_result_density, plot_alignment_result_only_distance
 from transcription_compare.results import MultiResult
 
 
@@ -82,10 +82,12 @@ def main(reference, output, reference_file, output_file, alignment, error_type, 
     for o in output_file:
         output_path = o.read()
         output_path_name = os.path.basename(o.name)
+        print('output_path_name', output_path_name)
         output_all[output_path_name] = output_path
 
     output_results = dict()  # (output_identifier -> output_string)
     for (key, value) in output_all.items():
+        print('key', key) # need more time
         output_results[key] = calculator.get_distance(reference, value, to_lower=to_lower,
                                                       remove_punctuation=remove_punctuation)
 
@@ -123,7 +125,8 @@ def main(reference, output, reference_file, output_file, alignment, error_type, 
         for (k, v) in output_results.items():
             alignment_results.append(v.alignment_result)
             sub_plot_name.append(k)
-        plot_alignment_result(alignment_results, to_edit_width, to_edit_step, sub_plot_name, file_path)
+        plot_alignment_result_only_distance(alignment_results, to_edit_width, to_edit_step, sub_plot_name, file_path)
+        # plot_alignment_result(alignment_results, to_edit_width, to_edit_step, sub_plot_name, file_path)
         # plot_alignment_result_density(alignment_results, to_edit_width, to_edit_step, sub_plot_name,
         #                               file_path)
 
