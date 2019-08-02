@@ -38,6 +38,13 @@ class AlignmentResult:
             outputs += i.outputs
         return outputs
 
+#  !!!!!!!!!!!!!!!!!!!!!!!!
+    def get_outputs_list(self):
+        outputs = []
+        for i in self.aligned_tokens_list:
+            outputs.append(i.outputs)
+        return outputs
+
     def get_outputs_str(self):
         return " ".join(self.get_outputs())
 
@@ -444,7 +451,16 @@ class AlignmentResultErrorSection:
 
     def set_correction(self, alignment_result_correction):
         self.alignment_result_correction = alignment_result_correction
+# !!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
+    def __len__(self):
+        return self.end_ind-self.start_ind
+
+    def get_first_item(self):
+        return self.original_alignment_result[self.start_ind]
+
+    def get_second_item(self):
+        return self.original_alignment_result[self.end_ind]
 
 def main():
     # First, you need to create a empty alignment result:
