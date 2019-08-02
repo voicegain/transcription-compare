@@ -22,7 +22,13 @@ alignment_result.add_token(ref_token="one", output_tokens=["one"], add_to_left=F
 alignment_result.add_token(ref_token="two", output_tokens=["two"], add_to_left=False)
 alignment_result.add_token(ref_token="and", output_tokens=["in", "and", "some"], add_to_left=False)
 alignment_result.add_token(ref_token="someday", output_tokens=["days"], add_to_left=False)
-
+alignment_result.add_token(ref_token="one", output_tokens=["one"], add_to_left=False)
+# alignment_result.add_token(ref_token="one", output_tokens=["one", "two", "three"], add_to_left=False)
+# alignment_result.add_token(ref_token="and", output_tokens=["in", "and", "some"], add_to_left=False)
+# alignment_result.add_token(ref_token="someday", output_tokens=["days"], add_to_left=False)
+alignment_result.add_token(ref_token="one", output_tokens=["la", "two", "three"], add_to_left=False)
+# alignment_result.add_token(ref_token="someday", output_tokens=["xi"], add_to_left=False)
+alignment_result.add_token(ref_token="someday", output_tokens=["ays"], add_to_left=False)
 alignment_result.merge_none_tokens()
 print('alignment_result', alignment_result)
 error_list = alignment_result.get_error_section_list()
@@ -141,41 +147,34 @@ for e in error_list:
                 tokenizer=CharacterTokenizer(),
                 get_alignment_result=False
             )
+            old_distance = alignment_result.calculate_three_kinds_of_distance()[0]
             distance = calculator.get_distance(all_reference[0], sort_output_list[0]).distance
         #             for x in generator.get_all_reference():
         #                 x = " ".join(x)
         #                 distance = calculator.get_distance(x, output_string).distance
 
+            d = 0
+            for current_output in sort_output_list:
+                print('current_reference', all_reference[0])
+                print('current_output', current_output)
+                d += calculator.get_distance(all_reference[0], current_output[0]).distance
+                d += calculator.get_distance(all_reference[1], current_output[1]).distance
+                print('old_distance', old_distance)
+                print('d', d)
+                if d < old_distance:
+                    old_distance = distance
+                    tmp_result = current_output
+                print('tmp_result', tmp_result)
+            if tmp_result is None:
+                pass
+            calculator2 = UKKLevenshteinDistanceCalculator(
+                tokenizer=WordTokenizer(),
+                get_alignment_result=True
+            )
+            update_result = calculator2.get_distance(all_reference[0], " ".join(tmp_result[0])).alignment_result
+            update_result += calculator2.get_distance(all_reference[1], " ".join(tmp_result[1])).alignment_result
+            print(update_result)
 
-        # output_string = alignment_result.get_outputs_str()
-        # # original_ref_string = alignment_result.get_reference_str()
-        # # print("++++++++++++++++before calculate three in DU")
-        # old_distance = alignment_result.calculate_three_kinds_of_distance()[0]
-        # generator = SimpleReferenceCombinationGenerator()
-        # tmp_result = None
-        # for index in range(0, len(alignment_result)):
-        #     # if aligned_tokens_list[index].reference.isdigit() is True:
-        #     result_digit = self.our_is_digit(aligned_tokens_list[index].reference)
-        #     if result_digit is not False:
-        #         for r in result_digit:
-        #             generator.add_new_token_options(r)
-        #     else:
-        #         generator.add_new_token_options([aligned_tokens_list[index].reference])
-        #
-        # # print('generator.get_all_reference()', generator.get_all_reference())
-        # for x in generator.get_all_reference():
-        #     x = " ".join(x)
-        #     distance = calculator.get_distance(x, output_string).distance
-        #     # print('x', x)
-        #     # print('output_string', output_string)
-        #     # print('distance', distance)
-        #
-        #     if distance < old_distance:
-        #         old_distance = distance
-        #         tmp_result = x
-        #
-        # if tmp_result is None:
-        #     return None
 
 def update_alignment_result_word(alignment_result):
     # fist check same character

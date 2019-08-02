@@ -87,7 +87,7 @@ def main(reference, output, reference_file, output_file, alignment, error_type, 
 
     output_results = dict()  # (output_identifier -> output_string)
     for (key, value) in output_all.items():
-        print('key', key) # need more time
+        print('key', key)#  need more time
         output_results[key] = calculator.get_distance(reference, value, to_lower=to_lower,
                                                       remove_punctuation=remove_punctuation)
 

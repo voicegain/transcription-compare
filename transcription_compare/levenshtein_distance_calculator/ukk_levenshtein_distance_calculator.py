@@ -1,6 +1,7 @@
 from .abstract_levenshtein_dsitance_calculator import AbstractLevenshteinDistanceCalculator
 from ..results import Result, AlignmentResult
 from ..ukk_matrix import FKPMatrix, FKPColumn
+# from ..utils.error_display_method import update_alignment_result_word
 
 
 class UKKLevenshteinDistanceCalculator(AbstractLevenshteinDistanceCalculator):
@@ -28,7 +29,7 @@ class UKKLevenshteinDistanceCalculator(AbstractLevenshteinDistanceCalculator):
                     for e in error_list:
                         # print("!!!!!!!!!!!!!!!!!!!!!!!")
                         # print(e.original_alignment_result)
-                        updated_alignment_result = self.digit_util.update_alignment_result(
+                        updated_alignment_result = update_alignment_result_word(
                             e.original_alignment_result)
                         if updated_alignment_result is not None:
                             # print(">>>>>>>>>>>>>not None")
@@ -37,6 +38,15 @@ class UKKLevenshteinDistanceCalculator(AbstractLevenshteinDistanceCalculator):
                     alignment_result.apply_error_section_list(error_list)
                 # print(">>>>>>>>>before calculate three")
                 distance, substitution, insertion, deletion = alignment_result.calculate_three_kinds_of_distance()
+                # error_list = alignment_result.get_error_section_list()
+                # for e in error_list:
+                #     if len(e) == 2:
+                #         updated_alignment_result_w = update_alignment_result_word(
+                #              e.original_alignment_result)
+                #         if updated_alignment_result_w is not None:
+                #             e.set_correction(updated_alignment_result_w)
+                # #  correct后的或者一开始就没有进去的都会apply back
+                # alignment_result.apply_error_section_list(error_list)
 
                 return Result(distance=distance,
                               substitution=substitution,
