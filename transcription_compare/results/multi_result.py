@@ -166,6 +166,7 @@ class MultiAlignmentResult:
         Return table2
             <table>
                   <tr>
+            <th>num</th>
             <th>Reference</th>
                     <th>output</th>
                     <th>distance</th>
@@ -179,16 +180,18 @@ class MultiAlignmentResult:
             </table>
         :return:
         """
-        body = """<table>\n<tr>\n<th>Reference</th>
+        body = """<table>\n<tr>\n<th>num</th>
+        <th>Reference</th>
                    <th>output</th>
                 <th>distance</th>
-                <th>substitution</th>
-                <th>insertion</th>
-                <th>deletion</th></tr><tbody>"""
+                <th>sub</th>
+                <th>ins</th>
+                <th>del</th></tr><tbody>"""
         # create header
         for c, t in enumerate(self.multi_alignment_tokens):
             body += t.to_html(c)
         # something else
+        # <p> annotation </p>
         body += '\n</tbody>\n</table>'
         return body
 
@@ -243,6 +246,7 @@ class MultiAlignedToken:
         Example output string:
           <tr>
             <td rowspan="3">ref</td>
+            <th>num</th>
             <td>output</td>
             <td>distance</td>
             <td>sub</td>
@@ -266,9 +270,13 @@ class MultiAlignedToken:
         :return:
         """
         if (c % 2) == 0:
-            message = '\n<tr bgcolor=#dddddd >\n<td rowspan="{}">'.format(len(self.output)) + self.reference + '</td>'
+
+            message = '\n<tr bgcolor=#dddddd >\n<td rowspan="{}"  width="10%">'.format(len(self.output)) + str(c) + '</td>'
+            message += '\n<td rowspan="{}">'.format(len(self.output)) + self.reference + '</td>'
         else:
-            message = '\n<tr>\n<td rowspan="{}">'.format(len(self.output)) + self.reference + '</td>'
+            message = '\n<tr>\n<td rowspan="{}">'.format(len(self.output)) + str(c) + '</td>'
+            message += '\n<td rowspan="{}">'.format(len(self.output)) + self.reference  + '</td>'
+        # message += '\n<td>' + str(c) + '</td>'
         for i in range(len(self.output)):
             if i != 0:
                 if (c % 2) == 0:
