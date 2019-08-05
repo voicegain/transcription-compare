@@ -153,9 +153,9 @@ class MultiAlignmentResult:
         :param alignment_results: List[AlignmentResult]
         """
         self.calculator_local = calculator_local
-        if len(alignment_results) <= 1:
-            raise ValueError("length of alignment_results should be >= 2")
-        print('len(alignment_results)', len(alignment_results))
+        if len(alignment_results) < 1:
+            raise ValueError("length of alignment_results should be >= １")
+        # print('len(alignment_results)', len(alignment_results))
         self.multi_alignment_tokens = []
         if None in alignment_results:
             # TODO: if one of the result does not have alignment_result, return
@@ -168,7 +168,7 @@ class MultiAlignmentResult:
         alignment_tokens_list = [
             alignment_result.aligned_tokens_list for alignment_result in alignment_results
         ]
-        print('alignment_tokens_list', alignment_tokens_list)
+        # print('alignment_tokens_list', alignment_tokens_list)
         for i in range(alignment_result_size):
             tmp_aligned_token_list = []
             for alignment_tokens in alignment_tokens_list:

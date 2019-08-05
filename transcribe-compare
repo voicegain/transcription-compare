@@ -95,9 +95,15 @@ def main(reference, output, reference_file, output_file, alignment, error_type, 
                                                       remove_punctuation=remove_punctuation)
 
     if not is_multiple:
-        result = list(output_results.values())[0]
+        calculator_local = UKKLevenshteinDistanceCalculator(
+            tokenizer=CharacterTokenizer(),
+            get_alignment_result=False
+        )
+        result = MultiResult(output_results, calculator_local)
+        # result = list(output_results.values())[0]
         # print(type(result))
     else:
+
         calculator_local = UKKLevenshteinDistanceCalculator(
             tokenizer=CharacterTokenizer(),
             get_alignment_result=False
