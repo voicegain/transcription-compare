@@ -1,9 +1,10 @@
 import inflect
 from transcription_compare.levenshtein_distance_calculator import UKKLevenshteinDistanceCalculator
-from transcription_compare.tokenizer import CharacterTokenizer, WordTokenizer
+from transcription_compare.tokenizer import WordTokenizer
 from transcription_compare.results import AlignmentResult
 from transcription_compare.utils import SimpleReferenceCombinationGenerator
-from transcription_compare.utils.digit_util import DigitUtil
+
+
 # digit_util = DigitUtil()
 
 

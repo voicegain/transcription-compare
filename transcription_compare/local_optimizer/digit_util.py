@@ -1,11 +1,12 @@
 import re
 import inflect
-from ..levenshtein_distance_calculator import UKKLevenshteinDistanceCalculator
-from ..tokenizer import WordTokenizer
-from ..utils import SimpleReferenceCombinationGenerator
+from transcription_compare.levenshtein_distance_calculator import UKKLevenshteinDistanceCalculator
+from transcription_compare.tokenizer import WordTokenizer
+from transcription_compare.utils import SimpleReferenceCombinationGenerator
+from .local_optimizer import LocalOptimizer
 
 
-class DigitUtil:
+class DigitUtil(LocalOptimizer):
     def __init__(self):
         self.p = inflect.engine()
 
@@ -69,7 +70,8 @@ class DigitUtil:
         else:
             return False
 
-    def update_alignment_result(self, alignment_result):
+    def update_alignment_result_error_section(self, alignment_result_error_section):
+        alignment_result = alignment_result_error_section.original_alignment_result
         #   alignment_result = result.alignment_result
         aligned_tokens_list = alignment_result.aligned_tokens_list
 

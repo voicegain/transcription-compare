@@ -1,5 +1,6 @@
 from typing import List
 import json
+from ..utils.html_color import create_bg_color
 
 
 class AlignmentResult:
@@ -35,6 +36,12 @@ class AlignmentResult:
         outputs = []
         for i in self.aligned_tokens_list:
             outputs += i.outputs
+        return outputs
+
+    def get_outputs_list(self):
+        outputs = []
+        for i in self.aligned_tokens_list:
+            outputs.append(i.outputs)
         return outputs
 
     def get_outputs_str(self):
@@ -100,6 +107,54 @@ class AlignmentResult:
             json_list.append(aligned_token.to_json())
         return json_list
 
+    def to_html(self):
+        message = """<html>
+            <head>
+            <style>
+            table {
+              font-family: arial, sans-serif;
+              border-collapse: collapse;
+              width: 100%;
+            }
+            td, th {
+              border: 1px solid #dddddd;
+              text-align: left;
+              padding: 8px;
+            }
+            </style>
+            </head>
+            <body>
+            <h2>transcription-compare Table</h2>
+            <table>
+              <tr>
+                <th>Reference</th>
+                <th>Output</th>
+                <th>distance</th>
+                <th>substitution</th>
+                <th>insertion</th>
+                <th>deletion</th>
+              </tr> """
+        all_substitution = 0
+        all_insertion = 0
+        all_deletion = 0
+        all_distance = 0
+        for aligned_token in self.aligned_tokens_list:
+            message_single, substitution, insertion, deletion = aligned_token.to_html()
+            # message += aligned_token.to_html()
+            message += message_single
+            all_substitution += substitution
+            all_insertion += insertion
+            all_deletion += deletion
+            all_distance += substitution + insertion + deletion
+            # print(message)
+        message += '\n<tr>\n<td colspan="2">' + 'total' + '</td>'
+        message += '\n<td>' + str(all_distance) + '</td>'
+        message += '\n<td>' + str(all_substitution) + '</td>'
+        message += '\n<td>' + str(all_insertion) + '</td>'
+        message += '\n<td>' + str(all_deletion) + '</td>\n</tr>'
+        message += '\n</body>\n</html>'
+        return message
+
     def __str__(self):
         return self.to_pretty_str()
 
@@ -128,6 +183,8 @@ class AlignmentResult:
         """
         merge all alignedToken whose reference is None into their neighborhood
         If possible, they are preferred to be merged into the token before it.
+        # TODO: might move it out of this method
+        Also move mistakes around to increase the number of lines that correct
         :return:
         """
         new_aligned_token_list = []
@@ -156,6 +213,21 @@ class AlignmentResult:
 
         self.aligned_tokens_list = new_aligned_token_list
 
+        for i in range(1, len(self.aligned_tokens_list)):
+            if (not self.aligned_tokens_list[i].match()) and (not self.aligned_tokens_list[i-1].match()):
+                # print(self.aligned_tokens_list[i-1].reference)
+                # print(self.aligned_tokens_list[i - 1].outputs[1:])
+                if len(self.aligned_tokens_list[i-1].outputs) > 0 and \
+                        self.aligned_tokens_list[i-1].reference == self.aligned_tokens_list[i-1].outputs[0]:
+                    self.aligned_tokens_list[i].extend_output_tokens(
+                                                output_tokens=self.aligned_tokens_list[i-1].outputs[1:],
+                                                extend_output_token_to_left=True
+                                            )
+                    self.aligned_tokens_list[i-1].outputs = [self.aligned_tokens_list[i-1].outputs[0]]
+                    # print('r', self.aligned_tokens_list[i - 1].reference,
+                    # 'o', self.aligned_tokens_list[i - 1].outputs)
+                    # print('ri', self.aligned_tokens_list[i].reference, 'oi', self.aligned_tokens_list[i].outputs)
+
     def __eq__(self, other):
         # not the same instance
         if not isinstance(other, AlignmentResult):
@@ -175,20 +247,14 @@ class AlignmentResult:
         substitution = 0
         insertion = 0
         deletion = 0
+        distance = 0
         for aligned_token in self.aligned_tokens_list:
-            if not aligned_token.match():
-                if len(aligned_token.outputs) == 0:
-                    deletion += 1
-                elif len(aligned_token.outputs) > 1:
-                    if aligned_token.reference == '':
-                        insertion += len(aligned_token.outputs)
-                    else:
-                        insertion += len(aligned_token.outputs) - 1
-                        if aligned_token.reference not in aligned_token.outputs:
-                             substitution += 1
-                else:
-                    substitution += 1
-        distance = substitution + insertion + deletion
+            tmp_distance, tmp_substitution, tmp_insertion, tmp_deletion \
+                = aligned_token.calculate_three_kinds_of_distance()
+            substitution += tmp_substitution
+            insertion += tmp_insertion
+            deletion += tmp_deletion
+            distance += tmp_distance
         return distance, substitution, insertion, deletion
 
     def get_error_section_list(self):
@@ -237,6 +303,24 @@ class AlignmentResult:
         output_aligned_tokens_list += self.aligned_tokens_list[start_ind:]
         self.aligned_tokens_list = output_aligned_tokens_list
 
+    def window(self, step, width):  # -> List[AlignmentResult]
+        output_list = list()
+
+        print('step', step)
+        if width >= len(self.aligned_tokens_list):
+            return [self]
+
+        for i in range(0, len(self.aligned_tokens_list), step):
+            if i+width <= len(self.aligned_tokens_list):
+                output_list.append(AlignmentResult(self.aligned_tokens_list[i:i+width]))
+        return output_list
+
+    def get_total_cer(self, calculator):
+        d = 0
+        for aligned_token in self.aligned_tokens_list:
+            d += aligned_token.get_character_level_result(calculator).distance
+        return d
+
 
 class AlignedToken:
     """
@@ -256,6 +340,37 @@ class AlignedToken:
             "ref": self.reference,
             "out": self.outputs
         }
+
+    def to_html(self):
+        """
+        Return str representation of an alignedToken
+        <reference_token>, [<output_token>]
+        :return:
+        """
+
+        distance, substitution, insertion, deletion = self.calculate_three_kinds_of_distance()
+
+        message = '\n<tr {}>\n<td>'.format(
+            create_bg_color(substitution, insertion, deletion)
+        ) + self.reference + '</td>'
+
+        # if deletion > 0:# blue
+        #     message = '\n<tr bgcolor=#00c3ff>\n<td>' + self.reference + '</td>'
+        # elif substitution > 0 and insertion == 0:#yellow
+        #     message = '\n<tr bgcolor="#f7fb00">\n<td>' + self.reference + '</td>'
+        # elif substitution > 0 and insertion > 0: # orange
+        #     message = '\n<tr bgcolor="#fb7900">\n<td>' + self.reference + '</td>'
+        # elif substitution == 0 and insertion > 0:  # red
+        #     message = '\n<tr bgcolor=#fb0000>\n<td>' + self.reference + '</td>'
+        # else:
+        #     message = '\n<tr>\n<td>' + self.reference + '</td>'
+        message += '\n<td>' + " ".join(self.outputs) + '</td>'
+        message += '\n<td>' + str(distance) + '</td>'
+        message += '\n<td>' + str(substitution) + '</td>'
+        message += '\n<td>' + str(insertion) + '</td>'
+        message += '\n<td>' + str(deletion) + '</td>\n</tr>'
+
+        return message, substitution, insertion, deletion
 
     def __str__(self):
         return json.dumps(self.to_json())
@@ -283,6 +398,28 @@ class AlignedToken:
             if self.reference == self.outputs[0]:
                 return True
         return False
+
+    def get_character_level_result(self, calculator):
+        return calculator.get_distance(self.reference, " ".join(self.outputs))
+
+    def calculate_three_kinds_of_distance(self):
+        substitution = 0
+        insertion = 0
+        deletion = 0
+        if not self.match():
+            if len(self.outputs) == 0:
+                deletion += 1
+            elif len(self.outputs) > 1:
+                if self.reference == '':
+                    insertion += len(self.outputs)
+                else:
+                    insertion += len(self.outputs) - 1
+                    if self.reference not in self.outputs:
+                        substitution += 1
+            else:
+                substitution += 1
+        distance = substitution + insertion + deletion
+        return distance, substitution, insertion, deletion
 
 
 class AlignmentResultErrorSectionList:
@@ -323,6 +460,130 @@ class AlignmentResultErrorSection:
 
     def set_correction(self, alignment_result_correction):
         self.alignment_result_correction = alignment_result_correction
+
+    def __len__(self):
+        """
+        length of original error part of alignment result.
+        NOT the correction
+        :return:
+        """
+        return len(self.original_alignment_result)
+
+    def get_all_options(self) -> [AlignmentResult]:
+        if len(self) != 2:
+            return
+        assign_list, first_fixed_section, second_fixed_section, all_reference, all_output = self.get_options(
+            self.original_alignment_result)
+        if len(assign_list) == 0 or assign_list is None:
+            return
+
+        # if len(assign_list) == 1:
+        #     alignment_result_options_after_assign = list()
+        #     aligned_token_1 = AlignedToken(reference=all_reference[0], outputs= [])
+        #     aligned_token_2 = AlignedToken(reference=all_reference[1], outputs= assign_list )
+        #     update_result = AlignmentResult(aligned_tokens_list=[aligned_token_1, aligned_token_2])
+        #     alignment_result_options_after_assign.append(update_result)
+        #     aligned_token_1 = AlignedToken(reference=all_reference[0], outputs= assign_list)
+        #     aligned_token_2 = AlignedToken(reference=all_reference[1], outputs= [])
+        #     update_result = AlignmentResult(aligned_tokens_list=[aligned_token_1, aligned_token_2])
+        #     alignment_result_options_after_assign.append(update_result)
+        # else:
+        # 如果有需要分配的
+        alignment_result_options_after_assign = list()
+        for index in range(len(assign_list) + 1):  # 因为range 会减一
+            tmp_first_tmp = first_fixed_section + assign_list[:index]
+            # 第一个是0 就是空，全部在第二行的意思
+            tmp_second_tmp = assign_list[index:] + second_fixed_section
+            aligned_token_1 = AlignedToken(reference=all_reference[0], outputs=tmp_first_tmp)
+            aligned_token_2 = AlignedToken(reference=all_reference[1], outputs=tmp_second_tmp)
+            update_result = AlignmentResult(aligned_tokens_list=[aligned_token_1, aligned_token_2])
+            alignment_result_options_after_assign.append(update_result)
+        # print('alignment_result_options_after_assign', alignment_result_options_after_assign)
+        return alignment_result_options_after_assign
+
+    @staticmethod
+    def get_options(original_alignment_result):
+        all_reference = original_alignment_result.get_reference()
+        all_output = original_alignment_result.get_outputs_list()
+        #  get the index
+        if len(all_output[0]) == 0 or len(all_output[1]) == 0:
+            return all_output[0] + all_output[1], [], [], all_reference, all_output
+
+        if all_reference[0] in all_output[0]:
+            output_first_index = all_output[0].index(all_reference[0])
+        else:
+            output_first_index = 0
+        if all_reference[1] in all_output[1]:
+            output_second_index = all_output[1].index(all_reference[1])
+        else:
+            output_second_index = -1
+        first_fixed_section = all_output[0][:output_first_index + 1]
+        second_fixed_section = all_output[1][output_second_index:]
+        assign_list = all_output[0][output_first_index + 1:] + all_output[1][:output_second_index]
+        return assign_list, first_fixed_section, second_fixed_section, all_reference, all_output
+
+    @staticmethod
+    def get_options_hanna(original_alignment_result):
+        all_reference = original_alignment_result.get_reference()
+        all_output = original_alignment_result.get_outputs_list()
+        #  get the index
+        # 0 vs 1
+        if len(all_output[0]) == 0 and len(all_output[1]) == 1:
+            assign_list = all_output[1]
+            first_fixed_section = None
+            second_fixed_section = None
+            # print('assign_list, first_fixed_section, second_fixed_section, all_reference, all_output')
+            # print(assign_list, first_fixed_section, second_fixed_section, all_reference, all_output)
+            return assign_list, first_fixed_section, second_fixed_section, all_reference, all_output
+        # 1 vs 0
+        if len(all_output[1]) == 0 and len(all_output[0]) == 1:
+            assign_list = all_output[0]
+            first_fixed_section = None
+            second_fixed_section = None
+            # print('assign_list, first_fixed_section, second_fixed_section, all_reference, all_output')
+            # print(assign_list, first_fixed_section, second_fixed_section, all_reference, all_output)
+            return assign_list, first_fixed_section, second_fixed_section, all_reference, all_output
+
+        # (0 or many)vs many
+        if len(all_output[0]) == 0:
+            output_first_index = None
+
+        elif all_reference[0] in all_output[0]:
+            output_first_index = all_output[0].index(all_reference[0])
+        else:
+            output_first_index = 0
+
+        # many vs (0 or many)
+        if len(all_output[1]) == 0:
+            output_second_index = None
+        elif all_reference[1] in all_output[1]:
+            output_second_index = all_output[1].index(all_reference[1])
+        else:
+            output_second_index = -1
+        #
+        if output_first_index is not None:
+            first_fixed_section = all_output[0][:output_first_index + 1]
+        else:
+            first_fixed_section = None
+
+        if output_second_index is not None:
+            second_fixed_section = all_output[1][output_second_index:]
+        else:
+            second_fixed_section = None
+
+        assign_list = []
+        if first_fixed_section is not None:
+            assign_list += all_output[0][output_first_index + 1:]
+        if second_fixed_section is not None:
+            # print('second_fixed_section', second_fixed_section)
+            assign_list += all_output[1][:output_second_index]
+        if first_fixed_section and second_fixed_section is None:
+            assign_list = None
+        # assign_list = assign_list_first + assign_list_second
+        # assign_list = all_output[0][output_first_index + 1:] + all_output[1][:output_second_index]
+        # print('assign_list, first_fixed_section, second_fixed_section, all_reference, all_output')
+        # print(assign_list, first_fixed_section, second_fixed_section, all_reference, all_output)
+        return assign_list, first_fixed_section, second_fixed_section, all_reference, all_output
 
 
 def main():

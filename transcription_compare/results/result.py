@@ -27,6 +27,9 @@ class Result:
             "alignment_result": self.alignment_result.to_json()
         }
 
+    def to_html(self):
+        return self.alignment_result.to_html()
+
     def __str__(self):
         return "distance: {}\nsubstitution: {}\ninsertion: {}\ndeletion: {}" \
                "\nerror rate: {}\nis_final: {}\nalignment_result:\n{}".format(
