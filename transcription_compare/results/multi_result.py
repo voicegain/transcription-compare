@@ -134,7 +134,7 @@ class MultiResult:
         identifiers = []
         for identifier in self.identifiers:
             identifiers.append(identifier)
-        print('identifiers', identifiers)
+        # print('identifiers', identifiers)
         return {
             "distance": self.distance,
             "error_rate": self.error_rate,
@@ -319,8 +319,6 @@ class MultiAlignedToken:
             message += '\n<td>' + str(self.deletion[i]) + '</td>\n</tr>'
 
         return message
-
-
 
     def to_json(self):
         """
