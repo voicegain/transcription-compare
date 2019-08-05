@@ -1,6 +1,5 @@
 from transcription_compare.levenshtein_distance_calculator import UKKLevenshteinDistanceCalculator
-from transcription_compare.tokenizer import CharacterTokenizer, WordTokenizer
-from transcription_compare.utils.digit_util import DigitUtil
+from transcription_compare.tokenizer import WordTokenizer
 import re
 
 calculator = UKKLevenshteinDistanceCalculator(

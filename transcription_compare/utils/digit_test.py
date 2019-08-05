@@ -1,6 +1,6 @@
 import unittest
 
-from transcription_compare.utils.digit_util import DigitUtil
+from transcription_compare.local_optimizer.digit_util import DigitUtil
 
 
 class TestCerFirst(unittest.TestCase):

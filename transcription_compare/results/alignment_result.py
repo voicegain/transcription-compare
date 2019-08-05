@@ -474,19 +474,32 @@ class AlignmentResultErrorSection:
             return
         assign_list, first_fixed_section, second_fixed_section, all_reference, all_output = self.get_options(
             self.original_alignment_result)
-        if len(assign_list) == 0:
+        if len(assign_list) == 0 or assign_list is None:
             return
-        # 如果有需要分配的
-        alignment_result_options_after_assign = list()
-        for index in range(len(assign_list) + 1):  # 因为range 会减一
-            tmp_first_tmp = first_fixed_section + assign_list[:index]
-            # 第一个是0 就是空，全部在第二行的意思
-            tmp_second_tmp = assign_list[index:] + second_fixed_section
-            aligned_token_1 = AlignedToken(reference=all_reference[0], outputs=tmp_first_tmp)
-            aligned_token_2 = AlignedToken(reference=all_reference[1], outputs=tmp_second_tmp)
+
+        if len(assign_list) == 1:
+            alignment_result_options_after_assign = list()
+            aligned_token_1 = AlignedToken(reference=all_reference[0], outputs= [])
+            aligned_token_2 = AlignedToken(reference=all_reference[1], outputs= assign_list )
             update_result = AlignmentResult(aligned_tokens_list=[aligned_token_1, aligned_token_2])
             alignment_result_options_after_assign.append(update_result)
+            aligned_token_1 = AlignedToken(reference=all_reference[0], outputs= assign_list)
+            aligned_token_2 = AlignedToken(reference=all_reference[1], outputs= [])
+            update_result = AlignmentResult(aligned_tokens_list=[aligned_token_1, aligned_token_2])
+            alignment_result_options_after_assign.append(update_result)
+        else:
+            # 如果有需要分配的
 
+            for index in range(len(assign_list) + 1):  # 因为range 会减一
+                alignment_result_options_after_assign = list()
+                tmp_first_tmp = first_fixed_section + assign_list[:index]
+                # 第一个是0 就是空，全部在第二行的意思
+                tmp_second_tmp = assign_list[index:] + second_fixed_section
+                aligned_token_1 = AlignedToken(reference=all_reference[0], outputs=tmp_first_tmp)
+                aligned_token_2 = AlignedToken(reference=all_reference[1], outputs=tmp_second_tmp)
+                update_result = AlignmentResult(aligned_tokens_list=[aligned_token_1, aligned_token_2])
+                alignment_result_options_after_assign.append(update_result)
+        # print('alignment_result_options_after_assign', alignment_result_options_after_assign)
         return alignment_result_options_after_assign
 
     @staticmethod
@@ -494,17 +507,61 @@ class AlignmentResultErrorSection:
         all_reference = original_alignment_result.get_reference()
         all_output = original_alignment_result.get_outputs_list()
         #  get the index
-        if all_reference[0] in all_output[0]:
+        # 0 vs 1
+        if len(all_output[0]) == 0 and len(all_output[1]) == 1:
+            assign_list = all_output[1]
+            first_fixed_section = None
+            second_fixed_section = None
+            # print('assign_list, first_fixed_section, second_fixed_section, all_reference, all_output')
+            # print(assign_list, first_fixed_section, second_fixed_section, all_reference, all_output)
+            return assign_list, first_fixed_section, second_fixed_section, all_reference, all_output
+        # 1 vs 0
+        if len(all_output[1]) == 0 and len(all_output[0]) == 1:
+            assign_list = all_output[0]
+            first_fixed_section = None
+            second_fixed_section = None
+            # print('assign_list, first_fixed_section, second_fixed_section, all_reference, all_output')
+            # print(assign_list, first_fixed_section, second_fixed_section, all_reference, all_output)
+            return assign_list, first_fixed_section, second_fixed_section, all_reference, all_output
+
+        # 0 vs many
+        if len(all_output[0]) == 0:
+            output_first_index = None
+
+        elif all_reference[0] in all_output[0]:
             output_first_index = all_output[0].index(all_reference[0])
         else:
             output_first_index = 0
-        if all_reference[1] in all_output[1]:
+
+        # many vs 0
+        if len(all_output[1]) == 0:
+            output_second_index = None
+        elif all_reference[1] in all_output[1]:
             output_second_index = all_output[1].index(all_reference[1])
         else:
             output_second_index = -1
-        first_fixed_section = all_output[0][:output_first_index + 1]
-        second_fixed_section = all_output[1][output_second_index:]
-        assign_list = all_output[0][output_first_index + 1:] + all_output[1][:output_second_index]
+
+        if output_first_index is not None:
+            first_fixed_section = all_output[0][:output_first_index + 1]
+        else:
+            first_fixed_section = None
+        if output_second_index is not None:
+            second_fixed_section = all_output[1][output_second_index:]
+        else:
+            second_fixed_section = None
+        #??????
+        assign_list = []
+        if first_fixed_section is not None:
+            assign_list += all_output[0][output_first_index + 1:]
+        if second_fixed_section is not None:
+            # print('second_fixed_section', second_fixed_section)
+            assign_list += all_output[1][:output_second_index]
+        if first_fixed_section and second_fixed_section is None:
+            assign_list = None
+        # assign_list = assign_list_first + assign_list_second
+        # assign_list = all_output[0][output_first_index + 1:] + all_output[1][:output_second_index]
+        # print('assign_list, first_fixed_section, second_fixed_section, all_reference, all_output')
+        # print(assign_list, first_fixed_section, second_fixed_section, all_reference, all_output)
         return assign_list, first_fixed_section, second_fixed_section, all_reference, all_output
 
 

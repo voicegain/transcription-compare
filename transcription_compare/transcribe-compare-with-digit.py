@@ -3,9 +3,7 @@
 import click
 from transcription_compare.levenshtein_distance_calculator import UKKLevenshteinDistanceCalculator
 from transcription_compare.tokenizer import CharacterTokenizer, WordTokenizer
-from transcription_compare.levenshtein_distance_calculator import UKKLevenshteinDistanceCalculator
-from transcription_compare.tokenizer import CharacterTokenizer, WordTokenizer
-from transcription_compare.utils.digit_util import our_is_digit, update_alignment_result
+from transcription_compare.local_optimizer.digit_util import update_alignment_result
 
 @click.command()
 @click.option('--reference', '-r', type=str, help='source string')

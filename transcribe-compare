@@ -3,9 +3,10 @@
 import click
 from transcription_compare.levenshtein_distance_calculator import UKKLevenshteinDistanceCalculator
 from transcription_compare.tokenizer import CharacterTokenizer, WordTokenizer
-from transcription_compare.utils.digit_util import DigitUtil
+from transcription_compare.local_optimizer.digit_util import DigitUtil
+from transcription_compare.local_optimizer.local_cer_optimizer import LocalCerOptimizer
 import os
-from transcription_compare.utils.plot_util import plot_alignment_result, plot_alignment_result_density, plot_alignment_result_only_distance
+from transcription_compare.utils.plot_util import plot_alignment_result_only_distance
 from transcription_compare.results import MultiResult
 
 
@@ -61,8 +62,6 @@ def main(reference, output, reference_file, output_file, alignment, error_type, 
         is_multiple = True
         # file_name = reference_file_name + '_' + 'multi_output'
 
-    digit_util = DigitUtil()
-
     if error_type == "CER":
         calculator = UKKLevenshteinDistanceCalculator(
             tokenizer=CharacterTokenizer(),
@@ -70,10 +69,14 @@ def main(reference, output, reference_file, output_file, alignment, error_type, 
         )
 
     else:
+        if is_multiple:
+            local_optimizers = [LocalCerOptimizer()]
+        else:
+            local_optimizers = [DigitUtil(), LocalCerOptimizer()]
         calculator = UKKLevenshteinDistanceCalculator(
             tokenizer=WordTokenizer(),
             get_alignment_result=alignment,
-            digit_util=digit_util
+            local_optimizers=local_optimizers
         )
 
     output_all = dict()  # (output identifier -> output string)
@@ -82,12 +85,12 @@ def main(reference, output, reference_file, output_file, alignment, error_type, 
     for o in output_file:
         output_path = o.read()
         output_path_name = os.path.basename(o.name)
-        print('output_path_name', output_path_name)
+        # print('output_path_name', output_path_name)
         output_all[output_path_name] = output_path
 
     output_results = dict()  # (output_identifier -> output_string)
     for (key, value) in output_all.items():
-        print('key', key)#  need more time
+        # print('key', key)#  need more time
         output_results[key] = calculator.get_distance(reference, value, to_lower=to_lower,
                                                       remove_punctuation=remove_punctuation)
 
@@ -95,7 +98,11 @@ def main(reference, output, reference_file, output_file, alignment, error_type, 
         result = list(output_results.values())[0]
         # print(type(result))
     else:
-        result = MultiResult(output_results)
+        calculator_local = UKKLevenshteinDistanceCalculator(
+            tokenizer=CharacterTokenizer(),
+            get_alignment_result=False
+        )
+        result = MultiResult(output_results, calculator_local)
 
         # print(result)
         # print(type(result))
