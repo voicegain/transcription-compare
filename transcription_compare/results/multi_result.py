@@ -1,4 +1,4 @@
-from ..utils.html_color import create_bg_color
+from transcription_compare.utils.html_color import create_bg_color
 # from transcription_compare.levenshtein_distance_calculator import UKKLevenshteinDistanceCalculator
 # from transcription_compare.tokenizer import CharacterTokenizer
 

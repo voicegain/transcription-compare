@@ -1,6 +1,7 @@
 from typing import List
 import json
-from ..utils.html_color import create_bg_color
+from transcription_compare.utils.html_color import create_bg_color
+from .aligned_token_classifier import ErrorType, AlignedTokenClassifier
 
 
 class AlignmentResult:
@@ -420,6 +421,9 @@ class AlignedToken:
                 substitution += 1
         distance = substitution + insertion + deletion
         return distance, substitution, insertion, deletion
+
+    def classify(self) -> ErrorType:
+        return AlignedTokenClassifier.get_instance().error_type_classify(self)
 
 
 class AlignmentResultErrorSectionList:
