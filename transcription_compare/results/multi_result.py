@@ -184,6 +184,7 @@ class MultiAlignmentResult:
             <th>num</th>
             <th>Reference</th>
                     <th>output</th>
+                    <th>error_type</th>
                     <th>local_cer</th>
                     <th>distance</th>
                     <th>substitution</th>
@@ -199,6 +200,7 @@ class MultiAlignmentResult:
         body = """<table>\n<tr>\n<th>num</th>
         <th>Reference</th>
                    <th>output</th>
+                   <th>error_type</th>
                    <th>local_cer</th>
                 <th>distance</th>
                 <th>sub</th>
@@ -236,10 +238,12 @@ class MultiAlignedToken:
         self.insertion = []
         self.deletion = []
         self.local_cer = []
+        self.error_type = []
         for aligned_token in self.aligned_token_list:
             distance, substitution, insertion, deletion = \
                 aligned_token.calculate_three_kinds_of_distance()
-            local_cer = aligned_token.get_character_level_result(self.calculator_local).distance
+            local_cer = aligned_token.get_character_level_cer(self.calculator_local)
+
             if self.reference is None:
                 self.reference = aligned_token.reference
                 self.output.append(aligned_token.outputs)
@@ -248,6 +252,7 @@ class MultiAlignedToken:
                 self.insertion.append(insertion)
                 self.deletion.append(deletion)
                 self.local_cer.append(local_cer)
+                self.error_type.append(aligned_token.classify().get_display_name())
                 # print('self.reference is None',self.reference)
             else:
                 if self.reference != aligned_token.reference:
@@ -260,6 +265,7 @@ class MultiAlignedToken:
                     self.deletion.append(deletion)
                     self.output.append(aligned_token.outputs)
                     self.local_cer.append(local_cer)
+                    self.error_type.append(aligned_token.classify().get_display_name())
                     # print('!!!!self.output', self.output)
 
     def to_html(self, c):
@@ -270,7 +276,8 @@ class MultiAlignedToken:
             <td rowspan="3">ref</td>
             <th>num</th>
             <td>output</td>
-            <th>local_cer</th>
+            <td>error_type</td>
+            <td>local_cer</td>
             <td>distance</td>
             <td>sub</td>
             <td>ins</td>
@@ -278,7 +285,8 @@ class MultiAlignedToken:
           </tr>
           <tr>
             <td>output</td>
-            <th>local_cer</th>
+            <td>error_type</td>
+            <td>local_cer</td>
             <td>distance</td>
             <td>sub</td>
             <td>ins</td>
@@ -311,6 +319,7 @@ class MultiAlignedToken:
             message += '\n<td {}>'.format(
                 create_bg_color(self.substitution[i], self.insertion[i], self.deletion[i])
             ) + " ".join(self.output[i]) + '</td>'
+            message += '\n<td>' + str(self.error_type[i]) + '</td>'
             #  local_cer
             message += '\n<td>' + str(self.local_cer[i]) + '</td>'
             message += '\n<td>' + str(self.distance[i]) + '</td>'
@@ -322,11 +331,12 @@ class MultiAlignedToken:
 
     def to_json(self):
         """
-        {"ref": "abc", "out": [[],["abc"],[]]}
+        {"ref": "abc", "out": [[],["abc"],[]], "error_type": self.error_type}
         :return:
         """
         return {
             "ref": self.reference,
-            "out": self.output
+            "out": self.output,
+            "error_type": self.error_type
         }
 

@@ -319,7 +319,7 @@ class AlignmentResult:
     def get_total_cer(self, calculator):
         d = 0
         for aligned_token in self.aligned_tokens_list:
-            d += aligned_token.get_character_level_result(calculator).distance
+            d += aligned_token.get_character_level_cer(calculator)
         return d
 
 
@@ -400,8 +400,10 @@ class AlignedToken:
                 return True
         return False
 
-    def get_character_level_result(self, calculator):
-        return calculator.get_distance(self.reference, " ".join(self.outputs))
+    def get_character_level_cer(self, calculator) -> int:
+        if self.match():
+            return 0
+        return calculator.get_distance(self.reference, " ".join(self.outputs)).distance
 
     def calculate_three_kinds_of_distance(self):
         substitution = 0
@@ -423,7 +425,9 @@ class AlignedToken:
         return distance, substitution, insertion, deletion
 
     def classify(self) -> ErrorType:
-        return AlignedTokenClassifier.get_instance().error_type_classify(self)
+        if not self.match():
+            return AlignedTokenClassifier.get_instance().error_type_classify(self)
+        return ErrorType.NA
 
 
 class AlignmentResultErrorSectionList:

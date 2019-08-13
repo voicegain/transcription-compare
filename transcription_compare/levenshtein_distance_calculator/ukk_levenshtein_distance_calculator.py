@@ -1,6 +1,7 @@
 from .abstract_levenshtein_dsitance_calculator import AbstractLevenshteinDistanceCalculator
 from ..results import Result, AlignmentResult
 from ..ukk_matrix import FKPMatrix, FKPColumn
+import time
 from ..tokenizer import CharacterTokenizer
 # from ..utils.error_display_method import update_alignment_result_word
 
@@ -13,6 +14,8 @@ class UKKLevenshteinDistanceCalculator(AbstractLevenshteinDistanceCalculator):
         self.local_optimizers = local_optimizers
 
     def get_result_from_list(self, ref_tokens_list, output_tokens_list):
+        start = time.clock()
+
         is_final, distance, fkp, row, col = self.ukk_threshold(
             a=ref_tokens_list,
             b=output_tokens_list

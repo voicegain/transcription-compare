@@ -147,12 +147,12 @@ def is_plural(aligned_token):
             aligned_token.reference[aligned_token.reference.find("'"):]:
             aligned_token.reference = aligned_token.reference.replace("'s", "")
             aligned_token.outputs[0] = aligned_token.outputs[0].replace("'s", "")
-            print("both have 's")
+            # print("both have 's")
     # else:
     #     reference = aligned_token.reference
     #     output = aligned_token.outputs[0]
-    print(aligned_token.outputs[0], aligned_token.reference)
-    print(p.compare(aligned_token.outputs[0], aligned_token.reference))
+    # print(aligned_token.outputs[0], aligned_token.reference)
+    # print(p.compare(aligned_token.outputs[0], aligned_token.reference))
     if p.compare(aligned_token.outputs[0], aligned_token.reference) is not False:
         if p.compare(aligned_token.outputs[0], aligned_token.reference) != "p:p":
             return ErrorType.PLURAL

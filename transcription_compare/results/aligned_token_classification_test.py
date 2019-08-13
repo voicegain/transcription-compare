@@ -7,118 +7,150 @@ from transcription_compare.results.alignment_result import AlignedToken
 class TestCerFirst(unittest.TestCase):
     """
     """
-    def test_apostrophe(self):
+    def test_1(self):
         """
         """
         aligned_token = AlignedToken(reference="lords", outputs=["lord's"])
-        self.assertEqual(aligned_token.classify(), ErrorType.APOSTROPHE)
+        print("lords, outputs=[lord's]", aligned_token.classify())
+        self.assertEqual(aligned_token.classify(), ErrorType.SAME_STEM_OTHER.display_name)
 
-    def test_apostrophe2(self):
+    def test_2(self):
         """
+        I think we can add more typr
         """
         aligned_token = AlignedToken(reference="i've", outputs=["ive"])
-        self.assertEqual(error_type_classify(aligned_token), ErrorType.APOSTROPHE)
+        print("i've, outputs=[ive", aligned_token.classify())
+        self.assertEqual(aligned_token.classify(), ErrorType.NOT_IN_WORD_NET.display_name)
 
     def test_double(self):
         """
         """
         aligned_token = AlignedToken(reference="to", outputs=["to", "to"])
-        self.assertEqual(aligned_token.classify(), ErrorType.DOUBLE)
+        self.assertEqual(aligned_token.classify(), ErrorType.DOUBLE.display_name)
 
     def test_number(self):
         """
         """
-        pass
-        # aligned_token = AlignedToken(reference="todo", outputs=["to", "do"])
-        # self.assertEqual(error_type_classify(aligned_token), ErrorType.SPLIT)
+        # pass
+        aligned_token = AlignedToken(reference="eighteenth", outputs=["eighteen"])
+        print("eighteen", aligned_token.classify())
+        self.assertEqual(aligned_token.classify(), ErrorType.NUMBER.display_name)
 
     def test_same_stem(self):
         """
         """
         aligned_token = AlignedToken(reference="hope", outputs=["hopeful"])
-        self.assertEqual(error_type_classify(aligned_token), ErrorType.SAME_STEM_OTHER)
+        print('hope", outputs=["hopeful', aligned_token.classify())
+        self.assertEqual(aligned_token.classify(), ErrorType.SAME_STEM_OTHER.display_name)
 
     def test_same_stem2(self):
         """
         """
         aligned_token = AlignedToken(reference="asking", outputs=["ask"])
-        self.assertEqual(error_type_classify(aligned_token), ErrorType.SAME_STEM_OTHER)
+        print('asking", outputs=["ask', aligned_token.classify())
+        self.assertEqual(aligned_token.classify(), ErrorType.SAME_STEM_OTHER.display_name)
 
     def test_same_meaning(self):
         """
         """
         pass
-        # aligned_token = AlignedToken(reference="gonna", outputs=["going", "to"])
-        # self.assertEqual(error_type_classify(aligned_token), ErrorType.SAME_MEANING)
+        aligned_token = AlignedToken(reference="gonna", outputs=["going", "to"])
+        self.assertEqual(aligned_token.classify(), ErrorType.SAME_MEANING.display_name)
 
     def test_split(self):
         """
         """
         aligned_token = AlignedToken(reference="todo", outputs=["to", "do"])
-        self.assertEqual(error_type_classify(aligned_token), ErrorType.SPLIT)
+        print('todo', aligned_token.classify())
+        self.assertEqual(aligned_token.classify(), ErrorType.SPLIT.display_name)
 
     def test_possessive(self):
         """
         """
         aligned_token = AlignedToken(reference="daniel", outputs=["daniel's"])
-        self.assertEqual(error_type_classify(aligned_token), ErrorType.POSSESSIVE)
+        print("reference=daniel, outputs=[daniel's]", aligned_token.classify())
+        self.assertEqual(aligned_token.classify(), ErrorType.SAME_STEM_OTHER.display_name)
 
     def test_name(self):
         """
         """
         pass
-        # aligned_token = AlignedToken(reference="daniel", outputs=["daniel's"])
-        # self.assertEqual(error_type_classify(aligned_token), ErrorType.NAME)
+        aligned_token = AlignedToken(reference="cindy", outputs=["sindy"])
+        print("daryl", aligned_token.classify())
+        self.assertEqual(aligned_token.classify(), ErrorType.IS_BOTH_NAME.display_name)
+
+    def test_name2(self):
+        """
+        """
+        aligned_token = AlignedToken(reference="daryl", outputs=["H"])
+        print("daryl", aligned_token.classify())
+        self.assertEqual(aligned_token.classify(), ErrorType.IS_REFERENCE_NAME.display_name)
 
     def test_verb_tense(self):
         """
         """
         aligned_token = AlignedToken(reference="long", outputs=["longed"])
-        self.assertEqual(error_type_classify(aligned_token), ErrorType.SAME_STEM_OTHER)
+        print('reference="long", outputs=["longed"]', aligned_token.classify())
+        self.assertEqual(aligned_token.classify(), ErrorType.SAME_STEM_OTHER.display_name)
         # ???????????????????????????????????????????????????????
 
     def test_verb_tense_BE(self):
         """
+        MAYBE WE CAN HAVE ONE MOE FOR be
         """
         aligned_token = AlignedToken(reference="are", outputs=["were"])
-        self.assertEqual(error_type_classify(aligned_token), ErrorType.VERB_TENSE)
-
+        print('reference="are", outputs=["were"]', aligned_token.classify())
+        self.assertEqual(aligned_token.classify(), ErrorType.BE_VERB.display_name)
+        # self.assertEqual(error_type_classify(aligned_token), ErrorType.VERB_TENSE)
 
     def test_verb_tense2(self):
         """
         """
         aligned_token = AlignedToken(reference="deposes", outputs=["deposed"])
-        self.assertEqual(error_type_classify(aligned_token), ErrorType.SAME_STEM_OTHER)
+        print('reference="deposes", outputs=["deposed"]', aligned_token.classify())
+        self.assertEqual(aligned_token.classify(), ErrorType.SAME_STEM_OTHER.display_name)
 
     def test_plural(self):
         """
         """
         aligned_token = AlignedToken(reference="lords", outputs=["lord"])
-        self.assertEqual(error_type_classify(aligned_token), ErrorType.PLURAL)
+        print('reference="lords", outputs=["lord"]', aligned_token.classify())
+        self.assertEqual(aligned_token.classify(), ErrorType.PLURAL.display_name)
+
+    def test_plurals(self):
+        """
+        """
+        aligned_token = AlignedToken(reference="apple", outputs=["apples"])
+        print('apple', aligned_token.classify())
+        self.assertEqual(aligned_token.classify(), ErrorType.PLURAL.display_name)
 
     def test_plural2(self):
         """
         """
         aligned_token = AlignedToken(reference="mean", outputs=["means"])
-        self.assertEqual(error_type_classify(aligned_token), ErrorType.PLURAL)
+        print('reference="mean", outputs=["means"]', aligned_token.classify())
+        self.assertEqual(aligned_token.classify(), ErrorType.PLURAL.display_name)
 
     def test_plural3(self):
         """
         """
         aligned_token = AlignedToken(reference="nebuchadnezzar's", outputs=["nebuchadnezzars's"])
-        self.assertEqual(error_type_classify(aligned_token), ErrorType.PLURAL)
+        print("reference=nebuchadnezzar's, outputs=[nebuchadnezzars's]", aligned_token.classify())
+        self.assertEqual(aligned_token.classify(), ErrorType.SAME_STEM_OTHER.display_name)
 
     def test_plural4(self):
         """
         """
         aligned_token = AlignedToken(reference="men", outputs=["man"])
-        self.assertEqual(error_type_classify(aligned_token), ErrorType.PLURAL)
+        print('reference="men", outputs=["man"]', aligned_token.classify())
+        self.assertEqual(aligned_token.classify(), ErrorType.PLURAL.display_name)
 
     def test_plural5(self):
         """
         """
         aligned_token = AlignedToken(reference="enable", outputs=["enables"])
-        self.assertEqual(error_type_classify(aligned_token), ErrorType.PLURAL)
+        print('reference="enable", outputs=["enables"]', aligned_token.classify())
+        self.assertEqual(aligned_token.classify(), ErrorType.PLURAL.display_name)
 
 
 

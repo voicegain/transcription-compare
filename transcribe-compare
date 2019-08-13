@@ -8,6 +8,7 @@ from transcription_compare.local_optimizer.local_cer_optimizer import LocalCerOp
 import os
 from transcription_compare.utils.plot_util import plot_alignment_result_only_distance
 from transcription_compare.results import MultiResult
+import time
 
 
 @click.command()
@@ -27,11 +28,14 @@ from transcription_compare.results import MultiResult
 @click.option('--to_edit_step', '-s', type=int, default=500, help='Please enter the step')
 @click.option('--to_edit_width', '-w', type=int, default=500, help='Please enter the width')
 @click.option('--file_path', '-f', help='Please enter the path where you would like to save the files')
+
+
 def main(reference, output, reference_file, output_file, alignment, error_type, output_format, to_lower,
          remove_punctuation, to_save_plot, to_edit_step, to_edit_width, file_path):
     """
     Transcription compare tool provided by VoiceGain
     """
+    start = time.clock()
     if file_path is not None:
         if os.path.isdir(file_path) is False:
             raise ValueError("No such file or directory")
@@ -88,11 +92,16 @@ def main(reference, output, reference_file, output_file, alignment, error_type, 
         # print('output_path_name', output_path_name)
         output_all[output_path_name] = output_path
 
+    elapsed = (time.clock() - start)
+    print("Time used before getting result:", elapsed)
+
     output_results = dict()  # (output_identifier -> output_string)
     for (key, value) in output_all.items():
         # print('key', key)#  need more time
         output_results[key] = calculator.get_distance(reference, value, to_lower=to_lower,
                                                       remove_punctuation=remove_punctuation)
+    elapsed = (time.clock() - start)
+    print("Time used when getting result:", elapsed)
 
     if not is_multiple:
         calculator_local = UKKLevenshteinDistanceCalculator(
@@ -142,7 +151,10 @@ def main(reference, output, reference_file, output_file, alignment, error_type, 
         # plot_alignment_result(alignment_results, to_edit_width, to_edit_step, sub_plot_name, file_path)
         # plot_alignment_result_density(alignment_results, to_edit_width, to_edit_step, sub_plot_name,
         #                               file_path)
+    elapsed = (time.clock() - start)
+    print("Time used:", elapsed)
 
 
 if __name__ == '__main__':
     main()
+
