@@ -2,16 +2,18 @@ from .abstract_levenshtein_dsitance_calculator import AbstractLevenshteinDistanc
 from ..results import Result, AlignmentResult
 from ..ukk_matrix import FKPMatrix, FKPColumn
 import time
+from tqdm import tqdm
 from ..tokenizer import CharacterTokenizer
 # from ..utils.error_display_method import update_alignment_result_word
 
 
 class UKKLevenshteinDistanceCalculator(AbstractLevenshteinDistanceCalculator):
 
-    def __init__(self, tokenizer, threshold=1, get_alignment_result=False, local_optimizers=None):
+    def __init__(self, tokenizer, threshold=1, get_alignment_result=False, local_optimizers=None, is_master=False):
         super().__init__(tokenizer, get_alignment_result)
         self.threshold = threshold
         self.local_optimizers = local_optimizers
+        self.is_master = is_master
 
     def get_result_from_list(self, ref_tokens_list, output_tokens_list):
         start = time.clock()
@@ -69,6 +71,11 @@ class UKKLevenshteinDistanceCalculator(AbstractLevenshteinDistanceCalculator):
         distance = None
         row = 0
 
+        if self.is_master:
+            p_bar = tqdm(total=p)
+        else:
+            p_bar = None
+
         while not last_col_is_created:
             last_col_is_created, is_final, distance, row = self._create_next_col(
                 fkp=fkp,
@@ -76,6 +83,12 @@ class UKKLevenshteinDistanceCalculator(AbstractLevenshteinDistanceCalculator):
                 size=r, a=a, b=b, a_len=a_len, b_len=b_len, p=p
             )
             count += 1
+            if self.is_master:
+                p_bar.update()
+
+        if p_bar is not None:
+            p_bar.close()
+
         return is_final, distance, fkp, row, count
 
     def _get_r_and_c_index(self, a, b):

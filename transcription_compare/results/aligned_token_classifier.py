@@ -4,6 +4,7 @@ import csv
 from nltk.corpus import wordnet as wn
 import inflect
 import pkg_resources
+from metaphone import doublemetaphone
 
 filter_file_names = ['names_csv/filter_female_first_names.csv',
                      'names_csv/filter_male_first_names.csv',
@@ -46,12 +47,31 @@ class ErrorType(Enum):
     BE_VERB = "be"
     PLURAL = "plural"
     IS_BOTH_NAME = "both are name"
+    IS_BOTH_NAME_MATCH = 'both are name and match'
     IS_REFERENCE_NAME = "reference is name"
     SAME_MEANING = "same meaning"
     SAME_STEM_OTHER = "having same stem"
     NOT_IN_WORD_NET = "reference is a difficult word"
     UNKNOWN = "unknown"
     NA = "N/A"
+
+
+class SameMeaningDictionary:
+    def __init__(self, dictionary_file):
+        self.dictionary = dict()
+        with open(dictionary_file, "r") as csv_file:
+            reader = csv.reader(csv_file)
+            for item in reader:
+                split_item = [i.split() for i in item]
+                for i in split_item:
+                    if len(i) == 1:
+                        self.dictionary[i[0]] = split_item
+
+    def is_same_meaning(self, reference, outputs):
+        if reference in self.dictionary:
+            if outputs in self.dictionary[reference]:
+                return True
+        return False
 
 
 class AlignedTokenClassifier:
@@ -80,7 +100,7 @@ class AlignedTokenClassifier:
             ]
             self.filter_names = self._get_name_files(filter_file_name_path)
             self.original_names = self._get_name_files(original_file_name_path)
-            self.same_meaning_dic = self._get_dictionary_files(same_meaning_file_path)
+            self.same_meaning_dic = SameMeaningDictionary(same_meaning_file_path)
             AlignedTokenClassifier.__instance = self
 
     def error_type_classify(self, aligned_token):
@@ -140,7 +160,14 @@ class AlignedTokenClassifier:
         if reference:
             outputs = self._check_is_name(aligned_token.outputs[0], filtered=False)
             if outputs:
-                return ErrorType.IS_BOTH_NAME
+                reference_double_result = doublemetaphone(aligned_token.reference)
+                output_double_result = doublemetaphone(aligned_token.outputs[0])
+                if reference_double_result[0] == output_double_result[0] \
+                        or reference_double_result[0] == output_double_result[1] or\
+                        reference_double_result[1] == output_double_result[0]:
+                    return ErrorType.IS_BOTH_NAME_MATCH
+                else:
+                    return ErrorType.IS_BOTH_NAME
             else:
                 return ErrorType.IS_REFERENCE_NAME
         return None
@@ -167,15 +194,14 @@ class AlignedTokenClassifier:
         :param aligned_token:
         :return:
         """
-        reference_outputs = self.same_meaning_dic
-        # reference_outputs = {"oh": ["o"], "ante": ["anti"], "gonna": ["going", "to"], "alright": ["all", "right"]}
         if len(aligned_token.outputs) == 2:
             if aligned_token.reference.replace("'s", "") == \
                     aligned_token.outputs[0] and aligned_token.outputs[1] == "is":
                 return ErrorType.SAME_MEANING
-        if aligned_token.reference in reference_outputs.keys():
-            if reference_outputs[aligned_token.reference] == aligned_token.outputs:
-                return ErrorType.SAME_MEANING
+
+        if self.same_meaning_dic.is_same_meaning(aligned_token.reference, aligned_token.outputs):
+            return ErrorType.SAME_MEANING
+
         return None
 
     @staticmethod
@@ -221,13 +247,4 @@ class AlignedTokenClassifier:
                 reader = csv.reader(csv_file)
                 for item in reader:
                     result.add(item[0].lower())
-        return result
-
-    @staticmethod
-    def _get_dictionary_files(file_names):
-        result = {}
-        with open(file_names, "r") as csv_file:
-            reader = csv.reader(csv_file)
-            for item in reader:
-                result[item[0]] = item[1].split()
         return result
