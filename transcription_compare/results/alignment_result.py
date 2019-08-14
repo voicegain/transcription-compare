@@ -328,8 +328,27 @@ class AlignedToken:
     (reference, output) token pair
     """
     def __init__(self, reference, outputs: List):
-        self.reference = reference
-        self.outputs = outputs
+        self._reference = reference
+        self._outputs = outputs
+        self._clear()
+
+    @property
+    def reference(self):
+        return self._reference
+
+    @property
+    def outputs(self):
+        return self._outputs
+
+    @reference.setter
+    def reference(self, reference):
+        self._reference = reference
+        self._clear()
+
+    @outputs.setter
+    def outputs(self, outputs):
+        self._outputs = outputs
+        self._clear()
 
     def to_json(self):
         """
@@ -389,23 +408,45 @@ class AlignedToken:
         return True
 
     def extend_output_tokens(self, output_tokens: List, extend_output_token_to_left: bool):
+        self._clear()
         if extend_output_token_to_left:
-            self.outputs = output_tokens + self.outputs
+            self._outputs = output_tokens + self.outputs
         else:
-            self.outputs = self.outputs + output_tokens
+            self._outputs = self.outputs + output_tokens
 
+    def _clear(self):
+        self._error_type = None
+        self._match = None
+        self._cer = None
+        self._substitution = None
+        self._insertion = None
+        self._deletion = None
+
+    # cache
     def match(self) -> bool:
+        if self._match is not None:
+            return self._match
+        self._match = False
         if len(self.outputs) == 1:
             if self.reference == self.outputs[0]:
-                return True
-        return False
+                self._match = True
+        return self._match
 
+    # cache
     def get_character_level_cer(self, calculator) -> int:
+        if self._cer is not None:
+            return self._cer
         if self.match():
-            return 0
-        return calculator.get_distance(self.reference, " ".join(self.outputs)).distance
+            self._cer = 0
+        else:
+            self._cer = calculator.get_distance(self.reference, " ".join(self.outputs)).distance
+        return self._cer
 
+    # cache
     def calculate_three_kinds_of_distance(self):
+        if (self._substitution is not None) and (self._deletion is not None) and (self._insertion is not None):
+            return self._substitution + self._deletion + self._insertion, self._substitution, \
+                   self._insertion, self._deletion
         substitution = 0
         insertion = 0
         deletion = 0
@@ -421,13 +462,20 @@ class AlignedToken:
                         substitution += 1
             else:
                 substitution += 1
-        distance = substitution + insertion + deletion
-        return distance, substitution, insertion, deletion
+        self._substitution, self._insertion, self._deletion = substitution, insertion, deletion
+        return self._substitution + self._deletion + self._insertion, \
+               self._substitution, self._insertion, self._deletion
 
+    # cache
     def classify(self) -> ErrorType:
+        if self._error_type is not None:
+            return self._error_type
+
         if not self.match():
-            return AlignedTokenClassifier.get_instance().error_type_classify(self)
-        return ErrorType.NA
+            self._error_type = AlignedTokenClassifier.get_instance().error_type_classify(self)
+        else:
+            self._error_type = ErrorType.NA
+        return self._error_type
 
 
 class AlignmentResultErrorSectionList:

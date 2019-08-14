@@ -1,6 +1,5 @@
 from transcription_compare.utils.html_color import create_bg_color
-# from transcription_compare.levenshtein_distance_calculator import UKKLevenshteinDistanceCalculator
-# from transcription_compare.tokenizer import CharacterTokenizer
+from transcription_compare.results.aligned_token_classifier import ErrorType
 
 
 class MultiResult:
@@ -29,6 +28,7 @@ class MultiResult:
             alignment_results.append(result.alignment_result)
 
         self.multi_alignment_result = MultiAlignmentResult(alignment_results, self.calculator_local)
+        self.total_rows = len(alignment_results[0])
 
     def to_html(self):
         """
@@ -69,6 +69,9 @@ class MultiResult:
           </tr>
         </tbody>
         </table>
+        first table
+        second table
+        third table
         :return:
         """
         # create table 1
@@ -103,9 +106,7 @@ class MultiResult:
               </tr>
             <tbody>
                """
-        # print('self.distance', self.distance)
         for index, identifier in enumerate(self.identifiers):
-            # print('identifiers', identifier)
             body += """<tr><td>{}</td>""".format(identifier)
             body += '\n<td>' + str(self.distance[index]) + '</td>'
             body += '\n<td>' + str(self.error_rate[index]) + '</td>'
@@ -115,6 +116,16 @@ class MultiResult:
         body += """</tbody>
                 </table>
                 """
+        body += """<table>\n<tr>\n<th>error_type</th>"""
+        for index, identifier in enumerate(self.identifiers):
+            body += """ <th>{}</th>""".format(identifier)
+            body += """<th>percentage</th>"""
+        body += """</tr>"""
+        body += self.multi_alignment_result.to_html_error_type(self.total_rows)
+        body += """</tbody>
+                        </table>
+                        """
+
         body += self.multi_alignment_result.to_html()
         body += '\n</body>\n</html>'
         return body
@@ -153,6 +164,7 @@ class MultiAlignmentResult:
         :param alignment_results: List[AlignmentResult]
         """
         self.calculator_local = calculator_local
+        self.size = len(alignment_results)
         if len(alignment_results) < 1:
             raise ValueError("length of alignment_results should be >= １")
         # print('len(alignment_results)', len(alignment_results))
@@ -175,10 +187,43 @@ class MultiAlignmentResult:
                 tmp_aligned_token_list.append(alignment_tokens[i])
             self.multi_alignment_tokens.append(MultiAlignedToken(tmp_aligned_token_list, self.calculator_local))
 
+    def to_html_error_type(self, total_rows):
+        # create header
+        all_count_error_type = []
+        for i in range(self.size):
+            d = dict()
+            for et in ErrorType:
+                d[et] = 0
+            all_count_error_type.append(d)
+        for t in self.multi_alignment_tokens:
+            error_type_list = t.error_type
+
+            for (M, error_type) in enumerate(error_type_list):
+                all_count_error_type[M][error_type] += 1
+
+        # print(all_count_error_type)
+        body = ''
+        for key in ErrorType:
+            if key == ErrorType.NA:
+                continue
+            body += """<tr><td>{}</td>""".format(key.get_display_name())
+            for j in range(len(all_count_error_type)):
+                # print('all_count_error_type[j][key]', all_count_error_type[j][key])
+                body += '\n<td>' + str(all_count_error_type[j][key]) + '</td>'
+                body += '\n<td>' + str(round(all_count_error_type[j][key]/total_rows, 7)) + '</td>' #  /all rows
+        body += '\n</tr>'
+        return body
+
     def to_html(self):
         """
         include header and call to_html of all items in self.multi_alignment_tokens
         Return table2
+        <table>\n<tr>\n
+           <th>error_type</th>
+            <th>sum</th></tr><tbody>
+                 \n</tbody>\n</table>
+
+
             <table>
                   <tr>
             <th>num</th>
@@ -229,7 +274,6 @@ class MultiAlignmentResult:
 
 class MultiAlignedToken:
     def __init__(self, aligned_token_list, calculator_local):
-        self.calculator_local = calculator_local
         self.aligned_token_list = aligned_token_list
         self.reference = None
         self.output = []
@@ -242,31 +286,20 @@ class MultiAlignedToken:
         for aligned_token in self.aligned_token_list:
             distance, substitution, insertion, deletion = \
                 aligned_token.calculate_three_kinds_of_distance()
-            local_cer = aligned_token.get_character_level_cer(self.calculator_local)
+            local_cer = aligned_token.get_character_level_cer(calculator_local)
 
             if self.reference is None:
                 self.reference = aligned_token.reference
-                self.output.append(aligned_token.outputs)
-                self.distance.append(distance)
-                self.substitution.append(substitution)
-                self.insertion.append(insertion)
-                self.deletion.append(deletion)
-                self.local_cer.append(local_cer)
-                self.error_type.append(aligned_token.classify().get_display_name())
-                # print('self.reference is None',self.reference)
             else:
                 if self.reference != aligned_token.reference:
                     raise ValueError("Difference reference")
-                else:
-                    # print('aligned_token.outputs', aligned_token.outputs)
-                    self.distance.append(distance)
-                    self.substitution.append(substitution)
-                    self.insertion.append(insertion)
-                    self.deletion.append(deletion)
-                    self.output.append(aligned_token.outputs)
-                    self.local_cer.append(local_cer)
-                    self.error_type.append(aligned_token.classify().get_display_name())
-                    # print('!!!!self.output', self.output)
+            self.output.append(aligned_token.outputs)
+            self.distance.append(distance)
+            self.substitution.append(substitution)
+            self.insertion.append(insertion)
+            self.deletion.append(deletion)
+            self.local_cer.append(local_cer)
+            self.error_type.append(aligned_token.classify())
 
     def to_html(self, c):
         """
@@ -304,7 +337,8 @@ class MultiAlignedToken:
         """
         if (c % 2) == 0:
 
-            message = '\n<tr bgcolor=#dddddd >\n<td rowspan="{}"  width="10%">'.format(len(self.output)) + str(c) + '</td>'
+            message = '\n<tr bgcolor=#dddddd >\n<td rowspan="{}"  width="10%">'.format(len(self.output)) \
+                      + str(c) + '</td>'
             message += '\n<td rowspan="{}">'.format(len(self.output)) + self.reference + '</td>'
         else:
             message = '\n<tr>\n<td rowspan="{}">'.format(len(self.output)) + str(c) + '</td>'
@@ -319,7 +353,7 @@ class MultiAlignedToken:
             message += '\n<td {}>'.format(
                 create_bg_color(self.substitution[i], self.insertion[i], self.deletion[i])
             ) + " ".join(self.output[i]) + '</td>'
-            message += '\n<td>' + str(self.error_type[i]) + '</td>'
+            message += '\n<td>' + str(self.error_type[i].get_display_name()) + '</td>'
             #  local_cer
             message += '\n<td>' + str(self.local_cer[i]) + '</td>'
             message += '\n<td>' + str(self.distance[i]) + '</td>'
@@ -337,6 +371,6 @@ class MultiAlignedToken:
         return {
             "ref": self.reference,
             "out": self.output,
-            "error_type": self.error_type
+            "error_type": [i.get_display_name() for i in self.error_type]
         }
 
