@@ -139,8 +139,21 @@ class MultiResult:
         self.insertion = []
         self.deletion = []
         self.identifiers = []
-        [{"ref": "abc", "out": [[],["abc"],[]]}, {"ref": "efg", "out": [["hehe"],[],["cdff"]]}]
+        [{"error_type": ["number", "double" ....]}]
+        [{"ref": "abc", "out": [[],["abc"],[]], "error_type": self.error_type,
+        "local_cer": self.local_cer, "distance": self.substitution, "ins": self.insertion,
+        "del": self.deletion}]
         :return:
+        {'distance': [2, 6], 'error_rate': [0.04081632653061224, 0.12244897959183673],
+        'is_final': [True, True], 'substitution': [1, 2], 'insertion': [1, 3], 'deletion': [0, 1],
+        'identifiers': ['scribble-2019-06-13-50.txt', '05152019-bi-51.txt'],
+        'error_type_info': [{"error_type": "number" , "sum":['1', '1'], "percentage":['..', '..'],
+         {"error_type": "double" , "sum":['2', '6'], "percentage":['..', '..'],
+         {"error_type": "split" , "sum":['17', '12'] "percentage":['..', '..'],...}]
+
+        'multi_alignment_result': [{"ref": "abc", "out": [[],["abc"],[]], "error_type": self.error_type,
+        "local_cer": self.local_cer, "distance": self.substitution, "ins": self.insertion,
+        "del": self.deletion]}
         """
         identifiers = []
         for identifier in self.identifiers:
@@ -154,7 +167,8 @@ class MultiResult:
             "insertion": self.insertion,
             "deletion": self.deletion,
             "identifiers": identifiers,
-            "multi_alignment_result": self.multi_alignment_result.to_json()
+            'error_type_info': self.multi_alignment_result.to_json_error_type(self.total_rows),
+            "multi_alignment_result": self.multi_alignment_result.to_json_alignment_result()
         }
 
 
@@ -187,8 +201,13 @@ class MultiAlignmentResult:
                 tmp_aligned_token_list.append(alignment_tokens[i])
             self.multi_alignment_tokens.append(MultiAlignedToken(tmp_aligned_token_list, self.calculator_local))
 
-    def to_html_error_type(self, total_rows):
-        # create header
+    def all_error_type(self):
+        """
+        all_count_error_type is a list contain more than or equal to one dictionary.
+        The dictionary is that all error types and their statistics.
+
+        :return:[{'number': '1', 'double': '2', ...},{'number': '1', 'double': '6', ...}]
+        """
         all_count_error_type = []
         for i in range(self.size):
             d = dict()
@@ -200,8 +219,11 @@ class MultiAlignmentResult:
 
             for (M, error_type) in enumerate(error_type_list):
                 all_count_error_type[M][error_type] += 1
+        return all_count_error_type
 
         # print(all_count_error_type)
+    def to_html_error_type(self, total_rows):
+        all_count_error_type = self.all_error_type()
         body = ''
         for key in ErrorType:
             if key == ErrorType.NA:
@@ -210,7 +232,7 @@ class MultiAlignmentResult:
             for j in range(len(all_count_error_type)):
                 # print('all_count_error_type[j][key]', all_count_error_type[j][key])
                 body += '\n<td>' + str(all_count_error_type[j][key]) + '</td>'
-                body += '\n<td>' + str(round(all_count_error_type[j][key]/total_rows, 7)) + '</td>' #  /all rows
+                body += '\n<td>' + str(round(100*all_count_error_type[j][key]/total_rows, 7)) + '</td>' #  /all rows
         body += '\n</tr>'
         return body
 
@@ -259,7 +281,44 @@ class MultiAlignmentResult:
         body += '\n</tbody>\n</table>'
         return body
 
-    def to_json(self):
+    def to_json_error_type(self, total_rows):
+        """
+        all_count_error_type is a list contain more than or equal to one dictionary.
+        the output of all_count_error_type is
+        [{'number': '1', 'double': '2', ...},{'number': '1', 'double': '6', ...}]
+
+
+        'error_type_info': [{"error_type": "number" , "sum":['1', '1'], "percentage":['..', '..'],
+         {"error_type": "double" , "sum":['2', '6'], "percentage":['..', '..'],
+         {"error_type": "split" , "sum":['17', '12'] "percentage":['..', '..'],...}]
+        """
+        error_type = []
+
+        all_count_error_type = self.all_error_type()
+        # print('all_count_error_type', all_count_error_type)
+        # print(len(all_count_error_type))
+
+        for key in ErrorType:
+            if key == ErrorType.NA:
+                continue
+            error_dict = {"error_type": "", "sum": [], "percentage": []}
+            error_dict["error_type"] = key.get_display_name()
+            # print('key', key.get_display_name())
+            for j in range(len(all_count_error_type)):
+
+                # print('j', j)
+                # print('all_count_error_type[j][key]', all_count_error_type[j][key])
+                # error_dict["sum"] += str(all_count_error_type[j][key])
+                # error_dict["percentage"] += str(round(all_count_error_type[j][key]/total_rows, 7))
+                error_dict["sum"].append(all_count_error_type[j][key])
+                # print('error_dict["sum"]', error_dict["sum"])
+                error_dict["percentage"].append(round(100*all_count_error_type[j][key] / total_rows, 7))
+
+            error_type.append(error_dict)
+        # print('error_type', error_type)
+        return error_type
+
+    def to_json_alignment_result(self):
         """
         put them together
         [{"ref": "abc", "out": [[],["abc"],[]]}, {"ref": "efg", "out": [["hehe"],[],["cdff"]]}]
@@ -300,6 +359,20 @@ class MultiAlignedToken:
             self.deletion.append(deletion)
             self.local_cer.append(local_cer)
             self.error_type.append(aligned_token.classify())
+
+        is_zero = True
+        for i in self.distance:
+            if i != 0:
+                is_zero = False
+                break
+        if is_zero:
+            self.output = [self.output[0]]
+            self.distance = [self.distance[0]]
+            self.substitution = [self.substitution[0]]
+            self.insertion = [self.insertion[0]]
+            self.deletion = [self.deletion[0]]
+            self.local_cer = [self.local_cer[0]]
+            self.error_type = [self.error_type[0]]
 
     def to_html(self, c):
         """
@@ -365,12 +438,19 @@ class MultiAlignedToken:
 
     def to_json(self):
         """
-        {"ref": "abc", "out": [[],["abc"],[]], "error_type": self.error_type}
+        {"ref": "abc", "out": [[],["abc"],[]], "error_type": self.error_type,
+        "local_cer": self.local_cer, "distance": self.substitution, "ins": self.insertion,
+        "del": self.deletion,"sub" : self.substitution}
         :return:
         """
         return {
             "ref": self.reference,
             "out": self.output,
-            "error_type": [i.get_display_name() for i in self.error_type]
+            "error_type": [i.get_display_name() for i in self.error_type],
+            "local_cer": [i for i in self.local_cer],
+            "distance": [i for i in self.distance],
+            "ins": [i for i in self.insertion],
+            "del": [i for i in self.deletion],
+            "sub": [i for i in self.substitution]
         }
 

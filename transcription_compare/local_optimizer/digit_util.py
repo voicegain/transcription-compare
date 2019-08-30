@@ -58,12 +58,11 @@ class DigitUtil(LocalOptimizer):
             elif len(number[0])+1 == len(input_string) and input_string[-1] == 's':
                 return [self.century(input_string)]
             else:
-                string = re.findall(r'[0-9]+|[a-zA-Z]+', input_string)
+                string = re.findall(r'[0-9.]+|[a-zA-Z]+', input_string)
                 result = []
                 for character in string:
-                    if character.isdigit() is False:
-                        for i in character:
-                            result.append({i})
+                    if character.replace(".", "", 1).isdigit() is False:
+                        result.append({character})
                     else:
                         result.append(self.number_to_word(character))
             return result

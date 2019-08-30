@@ -1,4 +1,5 @@
 from .abstract_tokenizer import AbstractTokenizer
+from nltk.tokenize import word_tokenize
 
 
 class WordTokenizer(AbstractTokenizer):
@@ -18,4 +19,5 @@ class WordTokenizer(AbstractTokenizer):
         if to_lower is True:
             token_string = token_string.lower()
         # print('token_string.split()',len(token_string.split()))
-        return token_string.split()
+        # return token_string.split()
+        return word_tokenize(token_string)

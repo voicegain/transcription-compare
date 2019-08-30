@@ -8,6 +8,7 @@ from transcription_compare.local_optimizer.local_cer_optimizer import LocalCerOp
 import os
 from transcription_compare.utils.plot_util import plot_alignment_result_only_distance
 from transcription_compare.results import MultiResult
+import json
 import time
 
 
@@ -61,7 +62,7 @@ def main(reference, output, reference_file, output_file, alignment, error_type, 
 
     if total_outputs == 1:
         is_multiple = False
-        file_name = reference_file_name + '_' + "output"
+        # file_name = reference_file_name + '_' + "output"
     else:
         is_multiple = True
         # file_name = reference_file_name + '_' + 'multi_output'
@@ -130,7 +131,10 @@ def main(reference, output, reference_file, output_file, alignment, error_type, 
         click.echo(result)
 
     elif output_format == 'JSON':
-        click.echo(result.to_json())
+        # click.echo(result.to_json())
+        s = result.to_json()
+        with open('json_output.json', 'w', encoding='utf-8') as f:
+            json.dump(s, f, ensure_ascii=False, indent=4)
 
     elif output_format == 'HTML':
         s = result.to_html()

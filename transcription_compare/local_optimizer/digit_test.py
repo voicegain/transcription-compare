@@ -94,5 +94,12 @@ class TestCerFirst(unittest.TestCase):
                                       'three seven zero',
                                       'three seventy'}])
 
+    def test_12(self):
+        """
+        """
+        result = self.digit_util.our_is_digit('1.5a')
+        # print(result)
+        self.assertEqual(result, [{'one point five', 'first point five'}, {'a'}])
+
 if __name__ == '__main__':
     unittest.main()
