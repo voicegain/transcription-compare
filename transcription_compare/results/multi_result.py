@@ -1,5 +1,6 @@
 from transcription_compare.utils.html_color import create_bg_color
 from transcription_compare.results.aligned_token_classifier import ErrorType
+from transcription_compare.tokens import Token
 
 
 class MultiResult:
@@ -342,6 +343,8 @@ class MultiAlignedToken:
         self.deletion = []
         self.local_cer = []
         self.error_type = []
+        self.pre = []
+        self.post = []
         for aligned_token in self.aligned_token_list:
             distance, substitution, insertion, deletion = \
                 aligned_token.calculate_three_kinds_of_distance()
@@ -360,6 +363,13 @@ class MultiAlignedToken:
             self.local_cer.append(local_cer)
             self.error_type.append(aligned_token.classify())
 
+            if not isinstance(self.reference, Token):
+                self.pre.append(None)
+                self.post.append(None)
+            else:
+                self.pre.append(self.reference.prefix)
+                self.post.append(self.reference.postfix)
+
         is_zero = True
         for i in self.distance:
             if i != 0:
@@ -373,6 +383,25 @@ class MultiAlignedToken:
             self.deletion = [self.deletion[0]]
             self.local_cer = [self.local_cer[0]]
             self.error_type = [self.error_type[0]]
+
+            if not isinstance(self.reference, Token):
+                self.pre.append(None)
+                self.post.append(None)
+            else:
+                self.pre = [self.reference.prefix]
+                self.post = [self.reference.postfix]
+
+    @ staticmethod
+    def has_pre_post(pre, post):
+        has_pre = False
+        has_post = False
+        for i in pre:
+            if i is not None:
+                has_pre = True
+        for i in post:
+            if i is not None:
+                has_post = True
+        return has_pre, has_post
 
     def to_html(self, c):
         """
@@ -408,14 +437,23 @@ class MultiAlignedToken:
           </tr>
         :return:
         """
+
+        has_pre, has_post = self.has_pre_post(self.pre, self.post)
+        if has_pre:
+            ref = " ".join(self.pre[0]) + " " + self.reference
+        else:
+            ref = self.reference
+        if has_post:
+            ref += " " + " ".join(self.post[0])
+
         if (c % 2) == 0:
 
             message = '\n<tr bgcolor=#dddddd >\n<td rowspan="{}"  width="10%">'.format(len(self.output)) \
                       + str(c) + '</td>'
-            message += '\n<td rowspan="{}">'.format(len(self.output)) + self.reference + '</td>'
+            message += '\n<td rowspan="{}">'.format(len(self.output)) + ref + '</td>'
         else:
             message = '\n<tr>\n<td rowspan="{}">'.format(len(self.output)) + str(c) + '</td>'
-            message += '\n<td rowspan="{}">'.format(len(self.output)) + self.reference + '</td>'
+            message += '\n<td rowspan="{}">'.format(len(self.output)) + ref + '</td>'
         # message += '\n<td>' + str(c) + '</td>'
         for i in range(len(self.output)):
             if i != 0:
@@ -443,14 +481,29 @@ class MultiAlignedToken:
         "del": self.deletion,"sub" : self.substitution}
         :return:
         """
-        return {
+        out = {
             "ref": self.reference,
-            "out": self.output,
-            "error_type": [i.get_display_name() for i in self.error_type],
-            "local_cer": [i for i in self.local_cer],
-            "distance": [i for i in self.distance],
-            "ins": [i for i in self.insertion],
-            "del": [i for i in self.deletion],
-            "sub": [i for i in self.substitution]
+
         }
+
+        has_pre, has_post = self.has_pre_post(self.pre, self.post)
+        if has_pre:
+            out_pre = {"pre": [i for i in self.pre]}
+            out.update(out_pre)
+
+        if has_post:
+            out_post = {"post": [i for i in self.post]}
+            out.update(out_post)
+
+        out_3 = {"out": self.output,
+                    "error_type": [i.get_display_name() for i in self.error_type],
+                    "local_cer": [i for i in self.local_cer],
+                    "distance": [i for i in self.distance],
+                    "ins": [i for i in self.insertion],
+                    "del": [i for i in self.deletion],
+                    "sub": [i for i in self.substitution]}
+        out.update(out_3)
+        return out
+
+
 

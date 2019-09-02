@@ -22,6 +22,8 @@ import time
 @click.option('--error_type', '-e', default='CER', type=click.Choice(['CER', 'WER']))
 @click.option('--output_format', '-j', default='TABLE',
               type=click.Choice(['JSON', 'TABLE', 'HTML']))
+@click.option('--brackets', '-b', multiple=True, default='()',
+              help='example input: -b () -b [] -b {} -b <>')
 @click.option('--to_lower', '-l', default=False, is_flag=True, help='Do you want to lower all the words? True/False')
 @click.option('--remove_punctuation', '-p', default=False, is_flag=True,
               help='Do you want to remove all the punctuation? True/False')
@@ -31,8 +33,9 @@ import time
 @click.option('--file_path', '-f', help='Please enter the path where you would like to save the files')
 
 
-def main(reference, output, reference_file, output_file, alignment, error_type, output_format, to_lower,
+def main(reference, output, reference_file, output_file, alignment, error_type, output_format,brackets, to_lower,
          remove_punctuation, to_save_plot, to_edit_step, to_edit_width, file_path):
+
     """
     Transcription compare tool provided by VoiceGain
     """
@@ -97,11 +100,15 @@ def main(reference, output, reference_file, output_file, alignment, error_type, 
     # elapsed = (time.clock() - start)
     # print("Time used before getting result:", elapsed)
 
+    brackets_list = []
+    for b in brackets:
+        brackets_list.append(b)
+
     output_results = dict()  # (output_identifier -> output_string)
     for (key, value) in output_all.items():
         print("Start to process {}".format(key))
         # print('key', key)#  need more time
-        output_results[key] = calculator.get_distance(reference, value, to_lower=to_lower,
+        output_results[key] = calculator.get_distance(reference, value, brackets_list=brackets_list,  to_lower=to_lower,
                                                       remove_punctuation=remove_punctuation)
     # elapsed = (time.clock() - start)
     # print("Time used when getting result:", elapsed)

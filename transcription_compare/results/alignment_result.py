@@ -66,7 +66,7 @@ class AlignmentResult:
     def add_token(self, ref_token, output_tokens: List, add_to_left: bool = True):
         """
         Add one ref-output pair to the alignmentResult list
-        :param ref_token: string. The ref token
+        :param ref_token: string (Token). The ref token
         :param output_tokens: list of String. Can be empty
         :param add_to_left:
             If True, add the new token to the left end of the list
