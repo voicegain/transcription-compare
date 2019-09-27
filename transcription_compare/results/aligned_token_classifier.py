@@ -153,8 +153,13 @@ class AlignedTokenClassifier:
         return None
 
     def is_plural(self, aligned_token):
-        if self.p.compare(aligned_token.outputs[0], aligned_token.reference) is not False:
-            if self.p.compare(aligned_token.outputs[0], aligned_token.reference) != "p:p":
+        try:
+            r = self.p.compare(aligned_token.outputs[0], aligned_token.reference)
+        except Exception as e:
+            # NOTE: might give string index out of range error
+            return None
+        if r is not False:
+            if r != "p:p":
                 return ErrorType.PLURAL
             return None
         return None
