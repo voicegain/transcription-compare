@@ -49,6 +49,18 @@
             "env": {
                 "PYTHONPATH": "${workspaceFolder}"
             }
+        }        ,
+        {
+            "name": "Python: transcribe-compare - medium-36",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/transcribe-compare",
+            "args": ["-R", "/medium/36/36-reference.txt", "-O", "/medium/36/36-smart-works-2019-09-27.txt", "-a", "-e", "WER", "-f", "/medium/36", "-j", "HTML", "-p", "-l"],
+            "console": "externalTerminal",
+            "pythonPath": "${config:python.pythonPath}",
+            "env": {
+                "PYTHONPATH": "${workspaceFolder}"
+            }
         }        
     ]
 }
