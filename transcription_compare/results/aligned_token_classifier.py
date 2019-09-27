@@ -23,6 +23,9 @@ for original_file_names in original_file_names:
 same_meaning_file = 'names_csv/same_meaning.csv'
 same_meaning_file_path = pkg_resources.resource_filename(__name__, same_meaning_file)
 
+in_wiki_not_in_word_net = 'in_wiki_not_in_wordnet.csv'
+in_wiki_not_in_word_net_file_path = pkg_resources.resource_filename(__name__, in_wiki_not_in_word_net)
+# print('in_wiki_not_in_word_net_file_path', in_wiki_not_in_word_net_file_path)
 be_verb = {'am': ['was'], 'is': ['was'], 'are': ['were'],
            'was': ['am', 'is'], 'were': ['are']}
 
@@ -98,8 +101,9 @@ class AlignedTokenClassifier:
             self.classifier_list_two = [
                 self.is_double, self.is_same_meaning, self.is_split
             ]
-            self.filter_names = self._get_name_files(filter_file_name_path)
-            self.original_names = self._get_name_files(original_file_name_path)
+            self.filter_names = self._get_files(filter_file_name_path)
+            self.original_names = self._get_files(original_file_name_path)
+            self.word_in_wiki_not_in_word_net = self._get_files([in_wiki_not_in_word_net_file_path])
             self.same_meaning_dic = SameMeaningDictionary(same_meaning_file_path)
             AlignedTokenClassifier.__instance = self
 
@@ -175,7 +179,8 @@ class AlignedTokenClassifier:
     def is_difficult_word(self, aligned_token):
         reference_in_word_net = self._check_in_word_net(aligned_token.reference)
         if reference_in_word_net is False:
-            return ErrorType.NOT_IN_WORD_NET
+            if aligned_token.reference not in self.word_in_wiki_not_in_word_net:
+                return ErrorType.NOT_IN_WORD_NET
         return None
 
     def is_same_stem(self, aligned_token):
@@ -240,9 +245,10 @@ class AlignedTokenClassifier:
             return string in self.original_names
 
     @staticmethod
-    def _get_name_files(file_names):
+    def _get_files(file_names):
         result = set()
         for file_name in file_names:
+            # print(file_name)
             with open(file_name, "r") as csv_file:
                 reader = csv.reader(csv_file)
                 for item in reader:

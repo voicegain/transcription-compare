@@ -76,7 +76,7 @@ class TestCerFirst(unittest.TestCase):
         pass
         aligned_token = AlignedToken(reference="cindy", outputs=["sindy"])
         print("daryl", aligned_token.classify())
-        self.assertEqual(aligned_token.classify(), ErrorType.IS_BOTH_NAME)
+        self.assertEqual(aligned_token.classify(), ErrorType.IS_BOTH_NAME_MATCH)
 
     def test_name2(self):
         """
@@ -84,6 +84,14 @@ class TestCerFirst(unittest.TestCase):
         aligned_token = AlignedToken(reference="daryl", outputs=["H"])
         print("daryl", aligned_token.classify())
         self.assertEqual(aligned_token.classify(), ErrorType.IS_REFERENCE_NAME)
+
+    def test_difficult_word(self):
+        """
+        """
+        pass
+        aligned_token = AlignedToken(reference="that", outputs=["but"])
+        print("that", aligned_token.classify())
+        self.assertEqual(aligned_token.classify(), ErrorType.UNKNOWN)
 
     def test_verb_tense(self):
         """
