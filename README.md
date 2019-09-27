@@ -46,8 +46,10 @@ python transcribe-compare -R sample_data/The_Princess_and_the_Pea-reference.txt 
 
 Contributed by [VoiceGain](https://www.voicegain.ai).
 
-VoiceGain provides Deep-Neural-Network-based Speech-to-Text (ASR) both in Cloud and On-Prem.
-Acessible via Web API or MRCP interface.
+VoiceGain provides Deep-Neural-Network-based Speech-to-Text (ASR) available in Cloud and also as an Edge Deployment.
+Acessible via RESTful Web API or MRCP v2 interface.
+Is suitable both for continuous large-vocabulary transcription (real-time or off-line) and for recognition using context-free grammars (e.g. GRXML).
+In addition to this VoiceGain platform provides API-driven method to modify models used in speech-to-text. It is possible to modify language model, pronunciation model, and the acoustic DNN model.
 
 
 ## License
