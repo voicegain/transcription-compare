@@ -32,7 +32,7 @@ class UKKLevenshteinDistanceCalculator(AbstractLevenshteinDistanceCalculator):
                 )
                 if self.local_optimizers is not None:
                     for local_optimizer in self.local_optimizers:
-                        print('local_optimizer', local_optimizer)
+                        # print('local_optimizer', local_optimizer)
 
                         error_list = alignment_result.get_error_section_list()
                         for e in error_list:
