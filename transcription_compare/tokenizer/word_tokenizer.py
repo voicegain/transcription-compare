@@ -15,16 +15,8 @@ class WordTokenizer(AbstractTokenizer):
         :param remove_punctuation: false means we don't need to remove all the punctuation
         :return:split token_string
         """
-        brackets_allowed = ''
-        for i, b in enumerate(brackets_list):
 
-            brackets_allowed += r'\{}(.*?)\{}'.format(b[0], b[-1])
-            # print('brackets_allowed', brackets_allowed)
-            if i != len(brackets_list)-1:
-                brackets_allowed += '|'
-                # r'\((.*?)\)|\[(.*?)\]|\<(.*?)\>'
-
-        def exclude_brackets_word(s):
+        def clean_words_dont_have_brackets(s):
             # do punctuation or lower
             # print('exclude_brackets_word', s)
             s = s.strip()
@@ -41,21 +33,41 @@ class WordTokenizer(AbstractTokenizer):
             # print('having_brackets_word', s)
             return [(s, True)]
 
-        list_s = []
-        count = 0
-        # for i in re.finditer(r"[{}()<>\[\]]+", case):  # 先看看有没有{}()<>，如果有，分割
-        for i in re.finditer(brackets_allowed, token_string):
-            # print(i.span())
-            if i.span()[0] != 0:
-                list_s += exclude_brackets_word(token_string[count:i.span()[0]])  # 有些string第一个不是符号呀
-            list_s += having_brackets_word(token_string[i.span()[0]:i.span()[1]])
-            count = i.span()[1]
+        if len(brackets_list) != 0:
+            brackets_allowed = ''
+            # print('brackets_list', brackets_list)
+            for i, b in enumerate(brackets_list):
 
-        if count != len(token_string):  # 1 上面的for剩下的没有[]的最后部分 2 string本身没有[]的呀。
-            # print(s[count:])
-            g = token_string[count:]
-            list_s += exclude_brackets_word(g)
+                brackets_allowed += r'\{}(.*?)\{}'.format(b[0], b[-1])
+                # print('brackets_allowed', brackets_allowed)
+                if i != len(brackets_list)-1:
+                    brackets_allowed += '|'
+                    # r'\((.*?)\)|\[(.*?)\]|\<(.*?)\>'
 
+
+
+            # if len(brackets_list) == 0:
+            #     return token_string.split()
+
+            list_s = []
+            count = 0
+            # for i in re.finditer(r"[{}()<>\[\]]+", case):  # 先看看有没有{}()<>，如果有，分割
+            # print('find', re.finditer(brackets_allowed, token_string))
+            for i in re.finditer(brackets_allowed, token_string):
+                # print('find',i.span())
+                if i.span()[0] != 0:
+                    list_s += clean_words_dont_have_brackets(token_string[count:i.span()[0]])  # 有些string第一个不是符号呀
+                list_s += having_brackets_word(token_string[i.span()[0]:i.span()[1]])
+                count = i.span()[1]
+
+            if count != len(token_string):  # 1 上面的for剩下的没有[]的最后部分 2 string本身没有[]的呀。
+                # print(s[count:])
+                g = token_string[count:]
+                list_s += clean_words_dont_have_brackets(g)
+
+        else:
+            list_s = clean_words_dont_have_brackets(token_string)
+            # print(list_s)
         # print(list_s)
 
         head_pre_list = []
@@ -84,8 +96,5 @@ class WordTokenizer(AbstractTokenizer):
                 token_list.append(i["w"])
             else:
                 token_list.append(Token(i["w"], prefix=i.get("pre"), postfix=i.get("post")))
-
-            # print('index', index)
-        # for token in token_list:
-            # print(type(token))
+        # print('token_list', token_list)
         return token_list

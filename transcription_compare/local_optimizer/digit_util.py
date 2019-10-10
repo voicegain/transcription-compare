@@ -71,6 +71,7 @@ class DigitUtil(LocalOptimizer):
 
     def update_alignment_result_error_section(self, alignment_result_error_section):
         alignment_result = alignment_result_error_section.original_alignment_result
+        # print('alignment_result', alignment_result)
         #   alignment_result = result.alignment_result
         aligned_tokens_list = alignment_result.aligned_tokens_list
 
@@ -87,10 +88,12 @@ class DigitUtil(LocalOptimizer):
         for index in range(0, len(alignment_result)):
             # if aligned_tokens_list[index].reference.isdigit() is True:
             result_digit = self.our_is_digit(aligned_tokens_list[index].reference)
-            if result_digit is not False:
+            if result_digit:
+                # print('yes', result_digit)
                 for r in result_digit:
                     generator.add_new_token_options(r)
             else:
+                # print('no', result_digit)
                 generator.add_new_token_options([aligned_tokens_list[index].reference])
 
         # print('generator.get_all_reference()', generator.get_all_reference())
@@ -100,10 +103,12 @@ class DigitUtil(LocalOptimizer):
             # print('x', x)
             # print('output_string', output_string)
             # print('distance', distance)
+            # print('old_distance', old_distance)
 
             if distance < old_distance:
                 old_distance = distance
                 tmp_result = x
+            # print('tmp', tmp_result)
 
         if tmp_result is None:
             return None
@@ -114,5 +119,8 @@ class DigitUtil(LocalOptimizer):
             tokenizer=WordTokenizer(),
             get_alignment_result=True
         )
+        # print(">>>>>>>>>>>>>not None")
         update_result = calculator2.get_distance(tmp_result, output_string).alignment_result
+
+        # print(update_result)
         return update_result

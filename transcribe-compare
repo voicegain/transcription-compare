@@ -45,13 +45,13 @@ def main(reference, output, reference_file, output_file, alignment, error_type, 
             raise ValueError("No such file or directory")
     if reference is not None:
         reference = reference
-        reference_file_name = "reference"
+        # reference_file_name = "reference"
     elif reference_file is not None:
         # with open(reference_file, 'r') as file1:
         # print(reference_file)
         # print(str(reference_file)[5:10])
 
-        reference_file_name = os.path.basename(reference_file.name)
+        # reference_file_name = os.path.basename(reference_file.name)
         # print('split', str(reference_file).split(" ")[1].split("\\")[-1].split(".")[0])
         reference = reference_file.read()
 
@@ -78,9 +78,13 @@ def main(reference, output, reference_file, output_file, alignment, error_type, 
 
     else:
         if is_multiple:
+
             local_optimizers = [LocalCerOptimizer()]
+            # we are not using digit util because the result have different length.
         else:
             local_optimizers = [DigitUtil(), LocalCerOptimizer()]
+            # local_optimizers = [LocalCerOptimizer()]
+
         calculator = UKKLevenshteinDistanceCalculator(
             tokenizer=WordTokenizer(),
             get_alignment_result=alignment,
@@ -88,9 +92,11 @@ def main(reference, output, reference_file, output_file, alignment, error_type, 
             is_master=True
         )
 
+
     output_all = dict()  # (output identifier -> output string)
     for (M, o) in enumerate(output):
         output_all["string_output_{}".format(M)] = o
+
     for o in output_file:
         output_path = o.read()
         output_path_name = os.path.basename(o.name)
@@ -110,10 +116,13 @@ def main(reference, output, reference_file, output_file, alignment, error_type, 
         # print('key', key)#  need more time
         output_results[key] = calculator.get_distance(reference, value, brackets_list=brackets_list,  to_lower=to_lower,
                                                       remove_punctuation=remove_punctuation)
+
     # elapsed = (time.clock() - start)
     # print("Time used when getting result:", elapsed)
+    # print(output_results)
 
     if not is_multiple:
+
         calculator_local = UKKLevenshteinDistanceCalculator(
             tokenizer=CharacterTokenizer(),
             get_alignment_result=False
@@ -121,6 +130,7 @@ def main(reference, output, reference_file, output_file, alignment, error_type, 
         result = MultiResult(output_results, calculator_local)
         # result = list(output_results.values())[0]
         # print(type(result))
+
     else:
 
         calculator_local = UKKLevenshteinDistanceCalculator(
@@ -129,7 +139,8 @@ def main(reference, output, reference_file, output_file, alignment, error_type, 
         )
         result = MultiResult(output_results, calculator_local)
 
-        # print(result)
+
+    # print(result)
         # print(type(result))
 
     if output_format == 'TABLE':

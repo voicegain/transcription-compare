@@ -9,6 +9,14 @@ class TestCerFirst(unittest.TestCase):
     def setUp(self) -> None:
         self.digit_util = DigitUtil()
 
+
+    def test_first_1(self):
+        """
+        """
+        result = self.digit_util.our_is_digit('into	in	to')
+        print(result)
+        self.assertEqual(result, [{'first', 'one'}])
+
     def test_first(self):
         """
         """

@@ -32,18 +32,19 @@ class UKKLevenshteinDistanceCalculator(AbstractLevenshteinDistanceCalculator):
                 )
                 if self.local_optimizers is not None:
                     for local_optimizer in self.local_optimizers:
+                        print('local_optimizer', local_optimizer)
 
                         error_list = alignment_result.get_error_section_list()
                         for e in error_list:
                             # print("!!!!!!!!!!!!!!!!!!!!!!!")
                             # print('local_optimizer', local_optimizer)
-                            # print(e.original_alignment_result)
+                            # print('orginal' , e.original_alignment_result)
                             updated_alignment_result = local_optimizer.update_alignment_result_error_section(e)
                             if updated_alignment_result is not None:
                                 # print(">>>>>>>>>>>>>not None")
                                 # print(updated_alignment_result)
                                 e.set_correction(updated_alignment_result)
-                            # print(" None")
+
                         alignment_result.apply_error_section_list(error_list)
                 # print(">>>>>>>>>before calculate three")
                 distance, substitution, insertion, deletion = alignment_result.calculate_three_kinds_of_distance()

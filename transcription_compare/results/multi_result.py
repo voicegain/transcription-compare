@@ -370,6 +370,8 @@ class MultiAlignedToken:
                 self.pre.append(self.reference.prefix)
                 self.post.append(self.reference.postfix)
 
+        # print('reference', self.reference)
+
         is_zero = True
         for i in self.distance:
             if i != 0:
