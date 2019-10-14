@@ -370,7 +370,6 @@ class MultiAlignedToken:
                 self.pre.append(self.reference.prefix)
                 self.post.append(self.reference.postfix)
 
-        # print('reference', self.reference)
 
         is_zero = True
         for i in self.distance:
@@ -403,6 +402,7 @@ class MultiAlignedToken:
         for i in post:
             if i is not None:
                 has_post = True
+        # print('has_pre, has_post', has_pre, has_post)
         return has_pre, has_post
 
     def to_html(self, c):
@@ -442,10 +442,12 @@ class MultiAlignedToken:
 
         has_pre, has_post = self.has_pre_post(self.pre, self.post)
         if has_pre:
+            # print('has pre')
             ref = " ".join(self.pre[0]) + " " + self.reference
         else:
             ref = self.reference
         if has_post:
+            # print('has post')
             ref += " " + " ".join(self.post[0])
 
         if (c % 2) == 0:

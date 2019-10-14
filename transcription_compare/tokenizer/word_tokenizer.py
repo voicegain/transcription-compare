@@ -4,6 +4,8 @@ from ..tokens import Token
 import re
 # brackets_allowed = ['[', ']', ')', ">", '(', "<"]
 
+FILL_WORD_LIST = ["um"]
+
 
 class WordTokenizer(AbstractTokenizer):
 
@@ -86,12 +88,44 @@ class WordTokenizer(AbstractTokenizer):
             merged_list[0]["pre"] = head_pre_list
 
         token_list = []
-        for i in merged_list:
+
+        new_merged_list = []
+        for index, word in enumerate(merged_list):
+            #
+            # if index == 0:
+            #     if word["w"] in FILL_WORD_LIST:
+            #         merged_list[index + 1]["pre"] = [word["w"]]
+
+            if word["w"] in FILL_WORD_LIST:
+                if index != 0:
+                    # print('post', merged_list[index - 1], merged_list[index])
+                    if "post" in new_merged_list[-1].keys():
+
+                        new_merged_list[-1]["post"] += [word["w"]]
+
+                    else:
+                        new_merged_list[-1]["post"] = [word["w"]]
+
+                    # if len(merged_list[index - 1]["post"]) != 0:
+
+                    # print('post', merged_list[index - 1]["post"])
+                    # print('post', type(merged_list[index - 1]["post"]))
+                else:
+                    merged_list[index + 1]["pre"] = [word["w"]]
+
+            else:
+                new_merged_list.append(word)
+
+        # print('new_merged_list', new_merged_list)
+        for i in new_merged_list:
             # if len(i) == 1:
             #     token_list.append(i["w"])
             # else:
+            # print(i)
+
             token_list.append(Token(i["w"], prefix=i.get("pre"), postfix=i.get("post"),
                                     use_alternative_spelling=use_alternative_spelling))
         # print('token_list', token_list)
         # print('token_list', token_list)
+        # print('token_list type', type(token_list[0]))
         return token_list
