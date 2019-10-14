@@ -27,6 +27,8 @@ import time
 @click.option('--to_lower', '-l', default=False, is_flag=True, help='Do you want to lower all the words? True/False')
 @click.option('--remove_punctuation', '-p', default=False, is_flag=True,
               help='Do you want to remove all the punctuation? True/False')
+@click.option('--use_alternative_spelling', '-u', default=False, is_flag=True,
+              help='Do you want to use American spelling instead of British spelling? True/False')
 @click.option('--to_save_plot', '-P', default=False, is_flag=True, help='Do you want to see the windows? True/False')
 @click.option('--to_edit_step', '-s', type=int, default=500, help='Please enter the step')
 @click.option('--to_edit_width', '-w', type=int, default=500, help='Please enter the width')
@@ -34,7 +36,7 @@ import time
 
 
 def main(reference, output, reference_file, output_file, alignment, error_type, output_format,brackets, to_lower,
-         remove_punctuation, to_save_plot, to_edit_step, to_edit_width, file_path):
+         remove_punctuation, to_save_plot, to_edit_step, to_edit_width, file_path, use_alternative_spelling):
 
     """
     Transcription compare tool provided by VoiceGain
@@ -115,7 +117,7 @@ def main(reference, output, reference_file, output_file, alignment, error_type, 
         print("Start to process {}".format(key))
         # print('key', key)#  need more time
         output_results[key] = calculator.get_distance(reference, value, brackets_list=brackets_list,  to_lower=to_lower,
-                                                      remove_punctuation=remove_punctuation)
+                                                      remove_punctuation=remove_punctuation, use_alternative_spelling=use_alternative_spelling)
 
     # elapsed = (time.clock() - start)
     # print("Time used when getting result:", elapsed)

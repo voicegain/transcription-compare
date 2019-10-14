@@ -12,11 +12,11 @@ class AbstractLevenshteinDistanceCalculator(ABC):
 
     def get_distance(self, ref_tokens: str, output_tokens: str, brackets_list: list = [],
                      to_lower: bool = False,
-                     remove_punctuation: bool = False) -> Result:
+                     remove_punctuation: bool = False, use_alternative_spelling: bool = False) -> Result:
 
         return self.get_result_from_list(
-            self.tokenizer.tokenize(ref_tokens, brackets_list, to_lower, remove_punctuation),
-            self.tokenizer.tokenize(output_tokens, brackets_list, to_lower, remove_punctuation)
+            self.tokenizer.tokenize(ref_tokens, brackets_list, to_lower, remove_punctuation, use_alternative_spelling),
+            self.tokenizer.tokenize(output_tokens, brackets_list, to_lower, remove_punctuation, use_alternative_spelling)
         )
 
     @abstractmethod

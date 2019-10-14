@@ -4,7 +4,7 @@ import string
 
 class CharacterTokenizer(AbstractTokenizer):
 
-    def tokenize(self, token_string, brackets_list, to_lower=False, remove_punctuation=False):
+    def tokenize(self, token_string, brackets_list, to_lower=False, remove_punctuation=False, use_alternative_spelling=False):
         """
         :param brackets_list,
         :param token_string:

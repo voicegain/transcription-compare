@@ -22,6 +22,7 @@ class UKKLevenshteinDistanceCalculator(AbstractLevenshteinDistanceCalculator):
             a=ref_tokens_list,
             b=output_tokens_list
         )
+        # print(distance)
 
         if self.get_alignment_result:
             if not is_final:

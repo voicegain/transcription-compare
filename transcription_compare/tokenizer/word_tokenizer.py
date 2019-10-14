@@ -7,12 +7,13 @@ import re
 
 class WordTokenizer(AbstractTokenizer):
 
-    def tokenize(self, token_string, brackets_list, to_lower=False, remove_punctuation=False):
+    def tokenize(self, token_string, brackets_list, to_lower=False, remove_punctuation=False, use_alternative_spelling=False):
         """
         :param brackets_list,
         :param token_string:
         :param to_lower: false means we don't need to make the input_string lowercase
         :param remove_punctuation: false means we don't need to remove all the punctuation
+        :param use_alternative_spelling: True means we won't count different English version errors.
         :return:split token_string
         """
 
@@ -43,11 +44,6 @@ class WordTokenizer(AbstractTokenizer):
                 if i != len(brackets_list)-1:
                     brackets_allowed += '|'
                     # r'\((.*?)\)|\[(.*?)\]|\<(.*?)\>'
-
-
-
-            # if len(brackets_list) == 0:
-            #     return token_string.split()
 
             list_s = []
             count = 0
@@ -91,10 +87,11 @@ class WordTokenizer(AbstractTokenizer):
 
         token_list = []
         for i in merged_list:
-            # print('i', i)
-            if len(i) == 1:
-                token_list.append(i["w"])
-            else:
-                token_list.append(Token(i["w"], prefix=i.get("pre"), postfix=i.get("post")))
+            # if len(i) == 1:
+            #     token_list.append(i["w"])
+            # else:
+            token_list.append(Token(i["w"], prefix=i.get("pre"), postfix=i.get("post"),
+                                    use_alternative_spelling=use_alternative_spelling))
+        # print('token_list', token_list)
         # print('token_list', token_list)
         return token_list
