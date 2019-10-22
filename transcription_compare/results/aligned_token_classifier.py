@@ -231,6 +231,7 @@ class AlignedTokenClassifier:
 
     @staticmethod
     def is_split(aligned_token):
+        # NOTE: not been used. We don't consider SPLIT as an error
         if "".join(aligned_token.outputs) == aligned_token.reference:
             return ErrorType.SPLIT
         return None

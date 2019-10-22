@@ -25,6 +25,7 @@ class UKKLevenshteinDistanceCalculator(AbstractLevenshteinDistanceCalculator):
         # print(distance)
 
         if self.get_alignment_result:
+            # NOTE: SPLIT is not considered as an error. (ALWAYS when get_alignment_result == True)
             if not is_final:
                 return Result(distance=distance, is_final=is_final, len_ref=len(ref_tokens_list))
             else:
@@ -58,6 +59,7 @@ class UKKLevenshteinDistanceCalculator(AbstractLevenshteinDistanceCalculator):
                               alignment_result=alignment_result
                               )
         else:
+            # NOTE: the distance comes from the UKK algorithm. (SPLIT is considered as an error)
             return Result(distance=distance, is_final=is_final, len_ref=len(ref_tokens_list))
 
     def ukk_threshold(self, a, b):

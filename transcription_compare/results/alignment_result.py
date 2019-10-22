@@ -430,6 +430,10 @@ class AlignedToken:
         if len(self.outputs) == 1:
             if self.reference == self.outputs[0]:
                 self._match = True
+        # if it's a SPLIT error, we return match
+        elif len(self.outputs) > 1:
+            if self.reference == "".join(self.outputs):
+                self._match = True
         return self._match
 
     # cache

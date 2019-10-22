@@ -123,27 +123,11 @@ def main(reference, output, reference_file, output_file, alignment, error_type, 
     # print("Time used when getting result:", elapsed)
     # print(output_results)
 
-    if not is_multiple:
-
-        calculator_local = UKKLevenshteinDistanceCalculator(
-            tokenizer=CharacterTokenizer(),
-            get_alignment_result=False
-        )
-        result = MultiResult(output_results, calculator_local)
-        # result = list(output_results.values())[0]
-        # print(type(result))
-
-    else:
-
-        calculator_local = UKKLevenshteinDistanceCalculator(
-            tokenizer=CharacterTokenizer(),
-            get_alignment_result=False
-        )
-        result = MultiResult(output_results, calculator_local)
-
-
-    # print(result)
-        # print(type(result))
+    calculator_local = UKKLevenshteinDistanceCalculator(
+        tokenizer=CharacterTokenizer(),
+        get_alignment_result=False
+    )
+    result = MultiResult(output_results, calculator_local)
 
     if output_format == 'TABLE':
         if is_multiple:
