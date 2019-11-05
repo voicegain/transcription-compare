@@ -15,4 +15,5 @@ setuptools.setup(
     packages=setuptools.find_packages(),
     install_requires=REQUIRES,
     scripts=['transcribe-compare'],
+    include_package_data=True
 )

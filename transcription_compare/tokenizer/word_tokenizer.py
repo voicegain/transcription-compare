@@ -9,7 +9,7 @@ FILL_WORD_LIST = ["um"]
 
 class WordTokenizer(AbstractTokenizer):
 
-    def tokenize(self, token_string, brackets_list, to_lower=False, remove_punctuation=False, use_alternative_spelling=False):
+    def tokenize(self, token_string, brackets_list=None, to_lower=False, remove_punctuation=False, use_alternative_spelling=False):
         """
         :param brackets_list,
         :param token_string:
@@ -29,14 +29,14 @@ class WordTokenizer(AbstractTokenizer):
             if to_lower:
                 s = s.lower()
             s = s.replace(" '", "'")
-            s = word_tokenize(s)
+            s = s.split()
             return [(t, False) for t in s]
 
         def having_brackets_word(s):
             # print('having_brackets_word', s)
             return [(s, True)]
 
-        if len(brackets_list) != 0:
+        if brackets_list:
             brackets_allowed = ''
             # print('brackets_list', brackets_list)
             for i, b in enumerate(brackets_list):

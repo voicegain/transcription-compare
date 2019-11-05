@@ -67,39 +67,46 @@ class DigitUtil(LocalOptimizer):
                         result.append(self.number_to_word(character))
             return result
         else:
-            return False
+            return []
 
     def update_alignment_result_error_section(self, alignment_result_error_section):
         alignment_result = alignment_result_error_section.original_alignment_result
+        word_tokenizer = WordTokenizer()
         # print('alignment_result', alignment_result)
         #   alignment_result = result.alignment_result
         aligned_tokens_list = alignment_result.aligned_tokens_list
 
         calculator = UKKLevenshteinDistanceCalculator(
-                    tokenizer=WordTokenizer(),
+                    tokenizer=None,
                     get_alignment_result=False
                 )
-        output_string = alignment_result.get_outputs_str()
+        outputs = alignment_result.get_outputs()
         # original_ref_string = alignment_result.get_reference_str()
         # print("++++++++++++++++before calculate three in DU")
         old_distance = alignment_result.calculate_three_kinds_of_distance()[0]
         generator = SimpleReferenceCombinationGenerator()
         tmp_result = None
+        no_digit = True
         for index in range(0, len(alignment_result)):
             # if aligned_tokens_list[index].reference.isdigit() is True:
             result_digit = self.our_is_digit(aligned_tokens_list[index].reference)
             if result_digit:
                 # print('yes', result_digit)
+                no_digit = False
                 for r in result_digit:
                     generator.add_new_token_options(r)
             else:
+
                 # print('no', result_digit)
                 generator.add_new_token_options([aligned_tokens_list[index].reference])
+        if no_digit:
+            return None
 
         # print('generator.get_all_reference()', generator.get_all_reference())
         for x in generator.get_all_reference():
-            x = " ".join(x)
-            distance = calculator.get_distance(x, output_string).distance
+            distance = calculator.get_result_from_list(
+                x, outputs
+            ).distance
             # print('x', x)
             # print('output_string', output_string)
             # print('distance', distance)
@@ -116,11 +123,12 @@ class DigitUtil(LocalOptimizer):
         #     if original_ref_string !=tmp_result:
         #        print("Update from '{}' to '{}', {}".format(original_ref_string, tmp_result, original_ref_string==tmp_result))
         calculator2 = UKKLevenshteinDistanceCalculator(
-            tokenizer=WordTokenizer(),
+            tokenizer=None,
             get_alignment_result=True
         )
         # print(">>>>>>>>>>>>>not None")
-        update_result = calculator2.get_distance(tmp_result, output_string).alignment_result
+        update_result = calculator2.get_result_from_list(
+            tmp_result, outputs).alignment_result
 
         # print(update_result)
         return update_result

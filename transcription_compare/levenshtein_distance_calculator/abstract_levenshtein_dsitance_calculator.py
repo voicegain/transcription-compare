@@ -6,7 +6,7 @@ from typing import List
 
 class AbstractLevenshteinDistanceCalculator(ABC):
 
-    def __init__(self, tokenizer: AbstractTokenizer, get_alignment_result: bool = False):
+    def __init__(self, tokenizer, get_alignment_result: bool = False):
         self.tokenizer = tokenizer
         self.get_alignment_result = get_alignment_result
 

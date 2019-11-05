@@ -46,4 +46,4 @@ def get_dic_from_web(link, output_path):
 
 url = 'http://www.tysto.com/uk-us-spelling-list.html'
 
-get_dic_from_web(url, 'uk_us_english')
+get_dic_from_web(url, 'uk_us_english.txt')
