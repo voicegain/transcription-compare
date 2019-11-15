@@ -16,7 +16,7 @@ class MultiResult:
         self.insertion = []
         self.deletion = []
         self.identifiers = []
-        alignment_results = []
+        self.alignment_results = []
 
         for (identifier, result) in output_results.items():
             self.identifiers.append(identifier)
@@ -26,10 +26,25 @@ class MultiResult:
             self.substitution.append(result.substitution)
             self.insertion.append(result.insertion)
             self.deletion.append(result.deletion)
-            alignment_results.append(result.alignment_result)
+            self.alignment_results.append(result.alignment_result)
 
-        self.multi_alignment_result = MultiAlignmentResult(alignment_results, self.calculator_local)
-        self.total_rows = len(alignment_results[0])
+        self.multi_alignment_result = MultiAlignmentResult(self.alignment_results, self.calculator_local)
+        self.total_rows = len(self.alignment_results[0])
+
+    def result(self):
+        return 'distance', self.distance, 'error_rate', self.error_rate, 'substitution', self.substitution,\
+               'insertion', self.insertion, 'deletion', self.deletion, 'identifiers', self.identifiers
+
+    def result_2(self):
+        print(' self.multi_alignment_result', self.multi_alignment_result)
+        for i in self.multi_alignment_result:
+            print(i.__str__())
+        return self.multi_alignment_result
+
+    def __str__(self):
+        return self.multi_alignment_result.__str__()
+
+
 
     def to_html(self):
         """
@@ -201,6 +216,37 @@ class MultiAlignmentResult:
             for alignment_tokens in alignment_tokens_list:
                 tmp_aligned_token_list.append(alignment_tokens[i])
             self.multi_alignment_tokens.append(MultiAlignedToken(tmp_aligned_token_list, self.calculator_local))
+
+    def __str__(self):
+        return self.to_pretty_str()
+
+    def to_pretty_str(self):
+        s = ""
+        for aligned_token in self.multi_alignment_tokens:
+            tokens = [str(aligned_token.reference)] + [str(aligned_token.output)]
+            # print('to', tokens)
+            s += ("\t".join(tokens) + "\n")
+        return s
+    # def __str__(self):
+    #     return self.multi_alignment_tokens
+    #     # r = ''
+    #     # for i in self.multi_alignment_tokens:
+    #     #     r += i[0]+ ' ' + i[1] + '\n'
+    #     #     return r
+    def __iter__(self):
+        """
+        for word in ..:
+            pass
+        :return:
+        """
+        return self.multi_alignment_tokens.__iter__()
+    def __getitem__(self, item):
+        """
+        self[1:3]
+        :param item:
+        :return:
+        """
+        return self.multi_alignment_tokens[item]
 
     def all_error_type(self):
         """
@@ -391,6 +437,15 @@ class MultiAlignedToken:
             else:
                 self.pre = [self.reference.prefix]
                 self.post = [self.reference.postfix]
+
+    def __str__(self):
+        return self.aligned_token_list
+        # for i in self.aligned_token_list:
+        #     print('aaaaaaaaaaaaaaa')
+        #     print(i)
+        # return i
+
+
 
     @ staticmethod
     def has_pre_post(pre, post):

@@ -130,9 +130,11 @@ def main(reference, output, reference_file, output_file, alignment, error_type, 
     result = MultiResult(output_results, calculator_local)
 
     if output_format == 'TABLE':
-        if is_multiple:
-            raise ValueError("TABLE output doesn't support multi-way comparison")
-        click.echo(result)
+        # if is_multiple:
+        #    raise ValueError("TABLE output doesn't support multi-way comparison")
+        click.echo(result.result())
+        click.echo(result.multi_alignment_result.__str__())
+        # click.echo(result.result_2())
 
     elif output_format == 'JSON':
         # click.echo(result.to_json())

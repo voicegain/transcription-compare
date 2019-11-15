@@ -6,6 +6,14 @@ import re
 
 FILL_WORD_LIST = ["um"]
 
+whitespace = ' \t\n\r\v\f'
+ascii_lowercase = 'abcdefghijklmnopqrstuvwxyz'
+ascii_uppercase = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
+ascii_letters = ascii_lowercase + ascii_uppercase
+digits = '0123456789'
+pun = "'"
+allow_character = digits + ascii_letters + whitespace + pun
+
 
 class WordTokenizer(AbstractTokenizer):
 
@@ -24,8 +32,15 @@ class WordTokenizer(AbstractTokenizer):
             # print('exclude_brackets_word', s)
             s = s.strip()
             if remove_punctuation:
-                punctuation = r"""!"#$%&()*+,-./:;<=>?@[\]^_`{|}~"""
-                s = s.translate(str.maketrans('', '', punctuation))
+                # punctuation = r"""!"#$%&()*+,-./:;<=>?@[\]^_`{|}~"""
+                # s = s.translate(str.maketrans('', '', punctuation))
+                new_s = ''
+                for one_character in s:
+                    if one_character in allow_character:
+                        new_s += one_character
+                    else:
+                        new_s += " "
+                s = new_s
             if to_lower:
                 s = s.lower()
             s = s.replace(" '", "'")
