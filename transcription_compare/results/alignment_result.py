@@ -529,11 +529,11 @@ class AlignmentResultErrorSection:
         """
         return len(self.original_alignment_result)
 
-    def get_all_options(self) -> [AlignmentResult]:
+    def get_all_options(self, ignore_long_output=True) -> [AlignmentResult]:
         if len(self) != 2:
             return
         assign_list, first_fixed_section, second_fixed_section, all_reference, all_output = self.get_options(
-            self.original_alignment_result)
+            self.original_alignment_result, ignore_long_output)
         if len(assign_list) == 0 or assign_list is None:
             return
 
@@ -562,9 +562,16 @@ class AlignmentResultErrorSection:
         return alignment_result_options_after_assign
 
     @staticmethod
-    def get_options(original_alignment_result):
+    def get_options(original_alignment_result, ignore_long_output=True):
+
         all_reference = original_alignment_result.get_reference()
         all_output = original_alignment_result.get_outputs_list()
+        if ignore_long_output:
+            ignore_long_output_threshold = 10
+            output_size = len(all_output[0]) + len(all_output[1])
+            if output_size > ignore_long_output_threshold:
+                return [], [], [], all_reference, all_output
+
         #  get the index
         if len(all_output[0]) == 0 or len(all_output[1]) == 0:
             return all_output[0] + all_output[1], [], [], all_reference, all_output
