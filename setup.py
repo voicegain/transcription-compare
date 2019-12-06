@@ -1,7 +1,7 @@
 import setuptools
 
 # cli
-REQUIRES = ["click", "inflect", "tqdm", "nltk", "pkg_resources", "metaphone", "bs4", "requests", "matplotlib", "seaborn"]
+REQUIRES = ["click", "inflect", "tqdm", "nltk", "metaphone", "bs4", "requests", "matplotlib", "seaborn"]
 
 with open("README.md", "r") as fh:
     long_description = fh.read()
