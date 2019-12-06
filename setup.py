@@ -1,14 +1,14 @@
 import setuptools
 
 # cli
-REQUIRES = ["click", "inflect", "tqdm", "nltk", "enum", "pkg_resources", "metaphone", "bs4", "requests", "matplotlib", "seaborn"]
+REQUIRES = ["click", "inflect", "tqdm", "nltk", "pkg_resources", "metaphone", "bs4", "requests", "matplotlib", "seaborn"]
 
 with open("README.md", "r") as fh:
     long_description = fh.read()
 
 setuptools.setup(
     name="transcription_compare",
-    version="0.0.5",
+    version="0.0.6",
     description="Compare transcription",
     long_description=long_description,
     long_description_content_type="text/markdown",
