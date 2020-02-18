@@ -126,7 +126,10 @@ class WordTokenizer(AbstractTokenizer):
                     # print('post', merged_list[index - 1]["post"])
                     # print('post', type(merged_list[index - 1]["post"]))
                 else:
-                    merged_list[index + 1]["pre"] = [word["w"]]
+                    if index == len(merged_list) - 1:
+                        new_merged_list.append(word)
+                    else:
+                        merged_list[index + 1]["pre"] = [word["w"]]
 
             else:
                 new_merged_list.append(word)
