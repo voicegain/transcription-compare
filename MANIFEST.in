@@ -1,2 +1,2 @@
-include transcription_compare\results\names_csv\*
-include transcription_compare\utils\uk_us_english.txt
+include transcription_compare/results/names_csv/*
+include transcription_compare/utils/uk_us_english.txt
