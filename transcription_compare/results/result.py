@@ -3,12 +3,21 @@ from .alignment_result import AlignmentResult
 
 class Result:
 
-    def __init__(self, distance: int, is_final: bool, len_ref: int,
+    def __init__(self, distance: int, is_final: bool, len_ref: int, len_output: int,
                  alignment_result: AlignmentResult = None, substitution: int = None,
                  insertion: int = None, deletion: int = None):
         self.distance = distance
-        if len_ref == 0:
-            self.error_rate = None
+
+        # we cannot calculate the error rate, because the word tokenizer make the ref empty
+
+        if (len_ref == 0) and (len_output == 0):
+            # we cannot calculate the error rate, because the word tokenizer make the ref and the output empty
+            self.error_rate = 0
+        elif (len_ref == 0) or (len_output == 0):
+            # we cannot calculate the error rate, because the word tokenizer make the ref or the output empty,
+            # like the sentence is just "um", or some words inside brackets if set the brackets list
+            self.error_rate = 1
+
         else:
             self.error_rate = self.distance / len_ref
         self.is_final = is_final
