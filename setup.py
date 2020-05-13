@@ -8,7 +8,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="transcription_compare",
-    version="0.0.10",
+    version="0.0.11",
     description="Compare transcription",
     long_description=long_description,
     long_description_content_type="text/markdown",
