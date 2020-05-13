@@ -1,7 +1,7 @@
 
 # ..
 import pkg_resources
-uk_us_file = 'utils/uk_us_english.txt'
+uk_us_file = 'utils/alternative_spelling.txt'
 uk_us_file = pkg_resources.resource_filename(__name__, uk_us_file)
 
 alternative_spelling_dict = {}  # uk to us

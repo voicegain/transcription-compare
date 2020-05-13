@@ -28,7 +28,7 @@ import time
 @click.option('--remove_punctuation', '-p', default=False, is_flag=True,
               help='Do you want to remove all the punctuation? True/False')
 @click.option('--use_alternative_spelling', '-u', default=False, is_flag=True,
-              help='Do you want to use American spelling instead of British spelling? True/False')
+              help='Ignore error made by alternative spelling? True/False')
 @click.option('--to_save_plot', '-P', default=False, is_flag=True, help='Do you want to see the windows? True/False')
 @click.option('--to_edit_step', '-s', type=int, default=500, help='Please enter the step')
 @click.option('--to_edit_width', '-w', type=int, default=500, help='Please enter the width')

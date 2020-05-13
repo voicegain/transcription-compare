@@ -4,7 +4,7 @@ from ..tokens import Token
 import re
 # brackets_allowed = ['[', ']', ')', ">", '(', "<"]
 
-FILL_WORD_LIST = ["um"]
+FILL_WORD_LIST = {"um", "mhmm", "hmm", "uh", "huh"}
 
 whitespace = ' \t\n\r\v\f'
 ascii_lowercase = 'abcdefghijklmnopqrstuvwxyz'
@@ -12,7 +12,7 @@ ascii_uppercase = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
 ascii_letters = ascii_lowercase + ascii_uppercase
 digits = '0123456789'
 pun = "'"
-allow_character = digits + ascii_letters + whitespace + pun
+allow_character = set(digits + ascii_letters + whitespace + pun)
 
 
 class TokenWithPrePostFlag:
