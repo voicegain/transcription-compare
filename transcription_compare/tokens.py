@@ -1,39 +1,66 @@
 
+# ..
+import pkg_resources
+uk_us_file = 'utils/alternative_spelling.txt'
+uk_us_file = pkg_resources.resource_filename(__name__, uk_us_file)
 
-class Token:
-    """
-    Token used in edit distance calculator.
+alternative_spelling_dict = {}  # uk to us
 
-    NOTE:
-        All kinds of tokens with __eq__ method implemented can be used in edit distance calculator
-        Normally, using string as token is the simplest approach.
-        This Token class is just a wrapper of str.
-        This class can be extended to achieve other functions
-    """
+with open(uk_us_file, "r", encoding="utf8") as id_file:
+    for line in id_file:
+        # print('line',line, len(line))
+        line_list = line.strip().split(",")
+        # print(line_list)
+        alternative_spelling_dict[line_list[0]] = line_list[1]
 
-    __slots__ = ("token_str", )
 
-    def __init__(self, token_str: str):
-        self.token_str = token_str
+class Token(str):
+
+    def __new__(cls, value, *args, **kwargs):
+        return super().__new__(cls, value)
+
+    def __init__(self, value, prefix=None, postfix=None, use_alternative_spelling=False):
+        self.prefix = prefix
+        self.postfix = postfix
+        # self.value = value
+        self.alternative_spelling_set = set()
+        if use_alternative_spelling:
+            # self.alternative_spelling_set.add('hi')
+            # print('value', value)
+            if value in alternative_spelling_dict.keys():
+                self.alternative_spelling_set.add(alternative_spelling_dict[value])
 
     def __eq__(self, other):
-        if isinstance(other, Token) and (other.token_str == self.token_str):
-            return True
-        if isinstance(other, str) and (other == self.token_str):
-            return True
-        return False
+        if self.alternative_spelling_set:
+            self_set = True
+        else:
+            self_set = False
 
+        if isinstance(other, Token):
+            if other.alternative_spelling_set:
+                other_set = True
+            else:
+                other_set = False
+        else:
+            other_set = False
 
-class MetaToken(Token):
-    """
-    Token with a map to store meta data
-    """
+        if self_set:
+            if other_set:
+                # need to compare American version not British version
+                for word in self.alternative_spelling_set:
+                    if word in other.alternative_spelling_set:
+                        return True
 
-    __slots__ = ("token_str", "metadata")
+            else:
+                if other in self.alternative_spelling_set:
+                    return True
+        else:
+            if other_set:
+                if self in other.alternative_spelling_set:
+                    return True
 
-    def __init__(self, token_str: str, metadata: dict):
-        super().__init__(token_str)
-        self.metadata = metadata
+        return super().__eq__(other)
 
-    def get_metadata(self, key):
-        return self.metadata.get(key)
+    def __hash__(self):
+        return super().__hash__()
+

@@ -1,44 +1,52 @@
 from .abstract_levenshtein_dsitance_calculator import AbstractLevenshteinDistanceCalculator
-from ..results import Result, AlignmentResult
-from ..ukk_matrix import FKPMatrix, FKPColumn
-from ..tokenizer import CharacterTokenizer
+from transcription_compare.results import Result, AlignmentResult
+from transcription_compare.ukk_matrix import FKPMatrix, FKPColumn
+import time
+from tqdm import tqdm
+from transcription_compare.tokenizer import CharacterTokenizer
 # from ..utils.error_display_method import update_alignment_result_word
 
 
 class UKKLevenshteinDistanceCalculator(AbstractLevenshteinDistanceCalculator):
 
-    def __init__(self, tokenizer, threshold=1, get_alignment_result=False, local_optimizers=None):
+    def __init__(self, tokenizer, threshold=1, get_alignment_result=False, local_optimizers=None, is_master=False):
         super().__init__(tokenizer, get_alignment_result)
         self.threshold = threshold
         self.local_optimizers = local_optimizers
+        self.is_master = is_master
 
     def get_result_from_list(self, ref_tokens_list, output_tokens_list):
+
         is_final, distance, fkp, row, col = self.ukk_threshold(
             a=ref_tokens_list,
             b=output_tokens_list
         )
+        # print(distance)
 
         if self.get_alignment_result:
+            # NOTE: SPLIT is not considered as an error. (ALWAYS when get_alignment_result == True)
             if not is_final:
-                return Result(distance=distance, is_final=is_final, len_ref=len(ref_tokens_list))
+                return Result(distance=distance, is_final=is_final, len_ref=len(ref_tokens_list),
+                              len_output=len(output_tokens_list))
             else:
                 alignment_result = self._get_alignment_result(
-                    fkp, row, col, s=ref_tokens_list, t=output_tokens_list
+                    fkp, row, col, reference=ref_tokens_list, output=output_tokens_list
                 )
                 if self.local_optimizers is not None:
                     for local_optimizer in self.local_optimizers:
+                        # print('local_optimizer', local_optimizer)
 
                         error_list = alignment_result.get_error_section_list()
                         for e in error_list:
                             # print("!!!!!!!!!!!!!!!!!!!!!!!")
                             # print('local_optimizer', local_optimizer)
-                            # print(e.original_alignment_result)
+                            # print('orginal' , e.original_alignment_result)
                             updated_alignment_result = local_optimizer.update_alignment_result_error_section(e)
                             if updated_alignment_result is not None:
                                 # print(">>>>>>>>>>>>>not None")
                                 # print(updated_alignment_result)
                                 e.set_correction(updated_alignment_result)
-                            # print(" None")
+
                         alignment_result.apply_error_section_list(error_list)
                 # print(">>>>>>>>>before calculate three")
                 distance, substitution, insertion, deletion = alignment_result.calculate_three_kinds_of_distance()
@@ -48,10 +56,13 @@ class UKKLevenshteinDistanceCalculator(AbstractLevenshteinDistanceCalculator):
                               insertion=insertion,
                               is_final=is_final,
                               len_ref=len(ref_tokens_list),
+                              len_output=len(output_tokens_list),
                               alignment_result=alignment_result
                               )
         else:
-            return Result(distance=distance, is_final=is_final, len_ref=len(ref_tokens_list))
+            # NOTE: the distance comes from the UKK algorithm. (SPLIT is considered as an error)
+            return Result(distance=distance, is_final=is_final, len_ref=len(ref_tokens_list),
+                          len_output=len(output_tokens_list))
 
     def ukk_threshold(self, a, b):
         a_len = len(a)
@@ -66,6 +77,11 @@ class UKKLevenshteinDistanceCalculator(AbstractLevenshteinDistanceCalculator):
         distance = None
         row = 0
 
+        if self.is_master:
+            p_bar = tqdm(total=p)
+        else:
+            p_bar = None
+
         while not last_col_is_created:
             last_col_is_created, is_final, distance, row = self._create_next_col(
                 fkp=fkp,
@@ -73,6 +89,12 @@ class UKKLevenshteinDistanceCalculator(AbstractLevenshteinDistanceCalculator):
                 size=r, a=a, b=b, a_len=a_len, b_len=b_len, p=p
             )
             count += 1
+            if self.is_master:
+                p_bar.update()
+
+        if p_bar is not None:
+            p_bar.close()
+
         return is_final, distance, fkp, row, count
 
     def _get_r_and_c_index(self, a, b):
@@ -157,138 +179,253 @@ class UKKLevenshteinDistanceCalculator(AbstractLevenshteinDistanceCalculator):
         fkp.append_col(new_col=new_col)
         return last_col_is_created, mid, distance, rows
 
-    def _get_alignment_result(self, fkp, row, col, s, t):
+    def _get_alignment_result(self, fkp, row, col, reference, output):
+        """
+        we are trying to get all alignment result by the fkp, from the cell where row and col point us, to the
+        end where the first cell. Don't get confused by the row and col.
+
+        :param fkp: (f(k,p)array from the ukk, a two dimensional array having
+        max_k rows whose indices correspond to d(i,j) array diagonal numbers and max_p columns whose indices range
+        from -1 to the largest possible d(i,j) array cell value.)
+        :param row: we should start getting alignment by this row. (the row is in the col)
+        :param col: we should start getting alignment by this row. (the col is in the row)
+        :param reference: reference string
+        :param output: output string
+        :return: alignment_result
+        """
+
         alignment_result = AlignmentResult()
-        count = 0
+        count_for_output = 0
         reach_first_cell = False
         while not reach_first_cell:
-            reach_first_cell, row, col, count = self._get_me_the_result(
-                fkp, row, col, count, s, t, alignment_result
+            # we will only stop when it is first cell
+            reach_first_cell, row, col, count_for_output = self._get_me_the_result_by_looping_through_each_col(
+                fkp, row, col, count_for_output, reference, output, alignment_result
             )
 
         alignment_result.merge_none_tokens()
         return alignment_result
 
-    def _get_me_the_result(self, fkp, row, col, count, s, t, alignment_result):
+    def _get_me_the_result_by_looping_through_each_col(self, fkp, row, col, count_for_output, reference, output,
+                                                       alignment_result):
         """
-        Good name
+        we are tying to get specific alignment result here by looping through each col.
+        eg:(1,2,3)
+        1: we first look at if the third number is zo or not. it is zero, we just look at the second number;
+        if it is not zero, which means the reference and the output are the same in this part,
+         and the look at the second number.
+
+        2: let' see what is the second number.
+
         :param fkp:
-        :param row:
-        :param col:
-        :param count:
-        :param s:
-        :param t:
+        :param row: we should start getting alignment by this row. (the row is in the col)
+        :param col: we should start getting alignment by this row. (the col is in the row)
+        :param count_for_output: get index of the output
+        :param reference:
+        :param output:
         :param alignment_result:
         :return: whether is first cell
         """
         # push same tokens to alignment_result (#3)
+        # if it is not zero, which means the reference and the output are the same in this part.
         if fkp.get_n_match(n_row=row, n_col=col) > 0:  # 3
             for i in range(fkp.get_n_match(n_row=row, n_col=col)):
-                count -= 1
-                self._alignment_add(s[fkp.get_n(n_row=row, n_col=col)-1-i], t[count], alignment_result)
+                count_for_output -= 1
+                self._alignment_add(reference[fkp.get_n(n_row=row, n_col=col)-1-i], output[count_for_output],
+                                    alignment_result)
         # distinguish insert / del / sub according to #2
-        return self._second_number(row, col, count, s, t, fkp, alignment_result)
+        # no matter if the third number is zero or not, we will have to look at the second number;
+        return self._second_number(row, col, count_for_output, reference, output, fkp, alignment_result)
 
-    def _second_number(self, row, col, count, s, t, fkp, alignment_result):
+    def _second_number(self, row, col, count_for_output, reference, output, fkp, alignment_result):
         """
-        :param row:
-        :param col:
-        :param count:
-        :param s:
-        :param t:
+        (the first number, the second number, the third number)
+        there are several situation:
+        1: if the second number is 1, it means we will have to delete one unit in the reference.
+            next cell is the upper right.
+
+        2: if the second number is -1, it means we will have to insert one unit in the output.
+            next cell is the upper left.
+
+        3: if the second number is 0, we need to do checking:
+           3.1: if upper is not none.-> will do substitution. next cell is the upper.
+           3.2: if upper is none.
+                have to check if it is the first cell by checking if the second number in the upper three is none.
+                -> if yes: we just keep.
+                   because the reference and the output are the same in this (the first number) part.
+
+                -> if the upper right is not none.
+                   It means in the very beginning, we have to delete one unit. and keep doing step 3.
+                -> if the upper left is not none.
+                   It means in the very beginning, we have to insert one unit. and keep doing step 3.
+
+        :param row: where we should look at
+        :param col: where we should look at
+        :param count_for_output: the part that we should look at output
+        :param reference:
+        :param output:
         :param fkp:
         :param alignment_result:
         :return: whether is first cell
         """
+        #  1: if the second number is 1, it means we will have to delete one unit in the reference.
+        #             next cell is the upper right by _next_move.
         if fkp.get_source(n_row=row, n_col=col) > 0:  # 2 means delete
             self._alignment_add(
-                s[fkp.get_n(n_row=row, n_col=col) - 1 - fkp.get_n_match(n_row=row, n_col=col)],
+                reference[fkp.get_n(n_row=row, n_col=col) - 1 - fkp.get_n_match(n_row=row, n_col=col)],
                 None,
                 alignment_result
             )
 
-        elif fkp.get_source(n_row=row, n_col=col) == 0:  # 2 sub
-            if fkp.get_source(n_row=row, n_col=col - 1) is not None:
-                count -= 1
-                # sub
-                self._alignment_add(
-                    s[fkp.get_n(n_row=row, n_col=col) - 1 - fkp.get_n_match(n_row=row, n_col=col)],
-                    t[count],
-                    alignment_result)
-
+        # 2: if the second number is -1, it means we will have to insert one unit in the output.
+        #             next cell is the upper left by _next_move.
         elif fkp.get_source(n_row=row, n_col=col) < 0:  # 2 insert: #means insert
 
-            count -= 1
-            self._alignment_add(None, t[count], alignment_result)
+            count_for_output -= 1
+            self._alignment_add(None, output[count_for_output], alignment_result)
             # print('insert', alignment_result)
-        return self._nextmove(row, col, count, s, t, fkp, alignment_result)
 
-    def _nextmove(self, row, col, count, s, t, fkp, alignment_result):
+        # if it is 0.
+        # if the upper one is not None, do sub.
+        # if not, we will check upper in the while.
+        elif fkp.get_source(n_row=row, n_col=col) == 0:  # 2 sub
+            if fkp.get_source(n_row=row, n_col=col - 1) is not None:
+                count_for_output -= 1
+                # sub
+                self._alignment_add(
+                    reference[fkp.get_n(n_row=row, n_col=col) - 1 - fkp.get_n_match(n_row=row, n_col=col)],
+                    output[count_for_output],
+                    alignment_result)
+
+        while True:
+            #
+            reach_first_cell, row, col, count_for_output, current_move_done = self._next_move(
+                row, col, count_for_output, reference, output, fkp, alignment_result
+            )
+            if current_move_done:
+                break
+        return reach_first_cell, row, col, count_for_output
+
+    def _next_move(self, row, col, count_for_output, reference, output, fkp, alignment_result):
         """
+        wo do next move because we need to know where to end the process.
 
+        1: check if it is the first cell by calling _next_one_step_move.
+         it will return is_first_cell, next_movement_direction, upper_cell_is_none_but_has_not_none_neighbor.
+         If the is_first_cell is True, we will end all the process. return none.
+
+        2: it not the first cell. it will return direction of next cell back to _second_number
+
+        3: because in the _second_number, we don't process two situations, because the rules are different:
+           one is insert in the very beginning; two is delete in the very beginning. So we do it here.
+           and it will return direction of next cell back to _second_number.
         :param row:
         :param col:
-        :param count:
-        :param s:
-        :param t:
+        :param count_for_output:
+        :param reference:
+        :param output:
         :param fkp:
         :param alignment_result:
-        :return: whether is first cell
+        :return: reach_first_cell, row, col, count_for_output, current_move_done
         """
-        is_first_cell, is_left, row, col = self._firstcell(row, col, fkp)
+        is_first_cell, next_movement_direction, upper_cell_is_none_but_has_not_none_neighbor = self._next_one_step_move(
+            row, col, fkp)
+        # 1: check if it is the first cell by calling _next_one_step_move.
+        #          it will return is_first_cell, next_movement_direction, upper_cell_is_none_but_has_not_none_neighbor.
+        #          If the is_first_cell is True, we will end all the process. return none.
+        if is_first_cell:
+            # directly return. We only care the first return value
+            return is_first_cell, None, None, None, True
 
-        if is_first_cell is False:  # not the first cell
-            if is_left is None:
-                return False, row, col, count
-                # self._get_me_the_result(fkp, row, col, count, s, t, alignment_result)
-            elif is_left:  # insert
-                count -= 1
-                self._alignment_add(None, t[count], alignment_result)
-                # print('insert',alignment_result)
-                return self._nextmove(row, col, count, s, t, fkp, alignment_result)
-            elif not is_left:
-                # delete
-                self._alignment_add(
-                    s[fkp.get_n(n_row=row, n_col=col) - fkp.get_n_match(n_row=row, n_col=col)],
-                    None,
-                    alignment_result
-                )
-                # alignment_add(S[FKP.get_n(n_row=row ,n_col=col)-1-FKP.get_n_match(n_row=row ,n_col=col)], None)
-                # print(alignment_result)
-                return self._nextmove(row, col, count, s, t, fkp, alignment_result)
+        next_row = row + next_movement_direction
+        next_col = col - 1
+        # 2: it not the first cell. it will return direction of next cell back to _second_number
+        if not upper_cell_is_none_but_has_not_none_neighbor:
+            # here upper cell is not None, has number
+            # is_first_cell == False
+            return is_first_cell, next_row, next_col, count_for_output, True
+
+        # 3: because in the _second_number, we don't process two situations, because the rules are different:
+        #            one is insert in the very beginning; two is delete in the very beginning. So we do it here.
+        if next_movement_direction == -1:
+            # move left, insert
+            count_for_output -= 1
+            self._alignment_add(None, output[count_for_output], alignment_result)
+            # print('insert',alignment_result)
+            return is_first_cell, next_row, next_col, count_for_output, False
+
         else:
-            return True, None, None, None
+            self._alignment_add(
+                reference[fkp.get_n(n_row=next_row, n_col=next_col) - fkp.get_n_match(n_row=next_row, n_col=next_col)],
+                None,
+                alignment_result
+            )
+
+            return is_first_cell, next_row, next_col, count_for_output, False
 
     @staticmethod
-    def _firstcell(row, col, fkp):
+    def _next_one_step_move(row, col, fkp):
         """
+        get_source means get the number in the middle.
+
+        we are checking if current cell is the first cell or not.
+        If the second number in the current cell is 1, it means this is not the first cell, and we should go upper right
+        If the second number in the current cell -1, it means this is not the first cell, and we should go upper left.
+
+        If the second number in the current cell 0, we should check what is the upper one.
+        -> if upper three are all none: we just keep the ref and output.
+           because the reference and the output are the same in this (the first number) part.
+
+        -> if the upper right is not none.
+           It means in the very beginning, we have to delete one unit. and keep doing step 3.
+        -> if the upper left is not none.
+           It means in the very beginning, we have to insert one unit. and keep doing step 3.
+
+
+
 
         :param row:
         :param col:
         :param fkp:
-        :return:  is_first_cell, is_left, row, col
+        :return:
+            is_first_cell: boolean. whether the cell is first cell
+            next_movement_direction: -1, 0, 1
+                -1 means go up and left
+                0 means go up
+                1 means go up and right
+            upper_cell_is_none_but_has_not_none_neighbor: boolean.
+                Whether current movement is not sufficient to do the next token alignment
         """
-        # print(fkp.get_all_in_cell(n_row=row, n_col=col))
         if fkp.get_source(n_row=row, n_col=col) == 1:
+            # It cannot be the first_cell. We move up and right
+            return False, 1, False
 
-            return False, None, row + 1, col - 1
         elif fkp.get_source(n_row=row, n_col=col) == -1:
-  
-            return False, None, row - 1, col - 1
-        elif fkp.get_source(n_row=row, n_col=col - 1) is not None:  # above
-     
-            return False, None, row, col - 1
-        elif fkp.get_source(n_row=row, n_col=col - 1) is None:
-            if fkp.get_source(n_row=row - 1, n_col=col - 1) is None:  # left
-                if fkp.get_source(n_row=row + 1, n_col=col - 1) is None:  # right
-   
-                    return True, None, row, col  # this is first cell
-                else:
-           
-                    return False, False, row + 1, col - 1  # right
+            # It cannot be the first_cell. We move up and left
+            return False, -1, False
+
+        else:
+            # We need to check the cell above the decide
+            col_move_up_by_one = col - 1
+            if fkp.get_source(n_row=row, n_col=col_move_up_by_one) is not None:  # above
+                # It cannot be the first cell. We move up
+                return False, 0, False
+
             else:
-             
-                return False, True, row - 1, col - 1
+                # We need to check left and right neighbors of the cell above to see whether it's the first cell
+
+                left_neighbor_source = fkp.get_source(n_row=row - 1, n_col=col_move_up_by_one)
+                right_neighbor_source = fkp.get_source(n_row=row + 1, n_col=col - 1)
+
+                if (left_neighbor_source is None) and (right_neighbor_source is None):
+                    # It's the first cell when both neighbors are None
+                    return True, None, False
+
+                elif left_neighbor_source is not None:
+                    return False, -1, True
+
+                else:
+                    return False, 1, True
 
     @staticmethod
     def _alignment_add(s_index, t_index, alignment_result):

@@ -1,0 +1,2 @@
+include transcription_compare/results/names_csv/*
+include transcription_compare/utils/alternative_spelling.txt

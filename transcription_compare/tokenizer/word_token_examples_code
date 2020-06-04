@@ -1,0 +1,113 @@
+
+from nltk.tokenize import word_tokenize
+from transcription_compare.tokens import Token
+import re
+
+
+brackets_allowed = ['[', ']', ')', ">", '(', "<"]
+remove_punctuation = True
+to_lower = True
+case = "(fruit) (fruit) apple- banana <A> apple you and me and she and who and who  [B] [B] apple"
+
+brackets_allowed_2 = r'\((.*?)\)|\[(.*?)\]|\<(.*?)\>'
+# brackets_allowed_2 = r'\((.*?)\)|\[(.*?)\]|\<(.*?)\>'
+def exclude_brackets_word(s):
+    # do punctuation or lower
+    # print('exclude_brackets_word', s)
+    s = s.strip()
+    if remove_punctuation:
+        punctuation = r"""!"#$%&()*+,-./:;<=>?@[\]^_`{|}~"""
+        s = s.translate(str.maketrans('', '', punctuation))
+    if to_lower:
+        s = s.lower()
+    s = s.replace(" '", "'")
+    s = word_tokenize(s)
+    return [(t, False) for t in s]
+
+
+def having_brackets_word(s):
+    # print('having_brackets_word', s)
+    return [(s, True)]
+
+
+list_s = []
+count = 0
+# for i in re.finditer(r"[{}()<>\[\]]+", case):  # 先看看有没有{}()<>，如果有，分割
+for i in re.finditer(r'\((.*?)\)|\[(.*?)\]|\<(.*?)\>', case):
+    print(i.span())
+    if i.span()[0] != 0:
+        list_s += exclude_brackets_word(case[count:i.span()[0]])  # 有些string第一个不是符号呀
+
+    list_s += having_brackets_word(case[i.span()[0]:i.span()[1]])
+    count = i.span()[1]
+
+if count != len(case):  # 1 上面的for剩下的没有[]的最后部分 2 string本身没有[]的。
+    # print(s[count:])
+    g = case[count:]
+    list_s += exclude_brackets_word(g)
+
+head_pre_list = []
+merged_list = []
+
+for token in list_s:
+    if token[1] is True:
+        if len(merged_list) == 0:
+            head_pre_list.append(token[0])
+        else:
+            last_merged_token = merged_list[-1]
+            if "post" in last_merged_token:
+                last_merged_token["post"].append(token[0])
+            else:
+                last_merged_token["post"] = [token[0]]
+    else:
+        merged_list.append({"w": token[0]})
+
+if (len(merged_list) > 0) and (len(head_pre_list) > 0):
+    merged_list[0]["pre"] = head_pre_list
+
+token_list = []
+for i in merged_list:
+    token_list.append(Token(i["w"], prefix=i.get("pre"), postfix=i.get("post")))
+
+print(merged_list)
+
+
+
+# if remove_punctuation is True:
+#     punctuation = r"""!"#$%&()*+,-./:;<=>?@[\]^_`{|}~"""
+#     token_string = token_string.translate(str.maketrans('', '', punctuation))
+#
+# if to_lower is True:
+#     token_string = token_string.lower()
+
+# token_string = token_string.replace(" '", "'")
+# token_str_list = word_tokenize(token_string)
+
+print('list_s', list_s)
+
+token_list = []
+pre = False
+index = 0
+while index < len(list_s):
+    if index == 0:
+        if list_s[0][0] in brackets_allowed and list_s[0][-1] in brackets_allowed:
+            pre = True
+    elif pre is True:
+        print('index, True', index)
+        token_list.append(Token(list_s[index], prefix=list_s[0]))
+        pre = False
+    elif pre is False:
+        # this is for the postfix
+        print('index false', index)
+        if index+1 != len(list_s) and list_s[index + 1][0] in brackets_allowed and list_s[index + 1][-1] in brackets_allowed:
+            token_list.append(Token(list_s[index], postfix=list_s[index+1]))
+            index += 1
+        else:
+            token_list.append(Token(list_s[index]))
+    index += 1
+    print('index', index)
+
+
+print(token_list)
+for token in token_list:
+    print(token, token.prefix, token.postfix)

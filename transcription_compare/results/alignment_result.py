@@ -1,6 +1,7 @@
 from typing import List
 import json
-from ..utils.html_color import create_bg_color
+from transcription_compare.utils.html_color import create_bg_color
+from .aligned_token_classifier import ErrorType, AlignedTokenClassifier
 
 
 class AlignmentResult:
@@ -65,7 +66,7 @@ class AlignmentResult:
     def add_token(self, ref_token, output_tokens: List, add_to_left: bool = True):
         """
         Add one ref-output pair to the alignmentResult list
-        :param ref_token: string. The ref token
+        :param ref_token: string (Token). The ref token
         :param output_tokens: list of String. Can be empty
         :param add_to_left:
             If True, add the new token to the left end of the list
@@ -318,7 +319,7 @@ class AlignmentResult:
     def get_total_cer(self, calculator):
         d = 0
         for aligned_token in self.aligned_tokens_list:
-            d += aligned_token.get_character_level_result(calculator).distance
+            d += aligned_token.get_character_level_cer(calculator)
         return d
 
 
@@ -327,8 +328,27 @@ class AlignedToken:
     (reference, output) token pair
     """
     def __init__(self, reference, outputs: List):
-        self.reference = reference
-        self.outputs = outputs
+        self._reference = reference
+        self._outputs = outputs
+        self._clear()
+
+    @property
+    def reference(self):
+        return self._reference
+
+    @property
+    def outputs(self):
+        return self._outputs
+
+    @reference.setter
+    def reference(self, reference):
+        self._reference = reference
+        self._clear()
+
+    @outputs.setter
+    def outputs(self, outputs):
+        self._outputs = outputs
+        self._clear()
 
     def to_json(self):
         """
@@ -388,21 +408,49 @@ class AlignedToken:
         return True
 
     def extend_output_tokens(self, output_tokens: List, extend_output_token_to_left: bool):
+        self._clear()
         if extend_output_token_to_left:
-            self.outputs = output_tokens + self.outputs
+            self._outputs = output_tokens + self.outputs
         else:
-            self.outputs = self.outputs + output_tokens
+            self._outputs = self.outputs + output_tokens
 
+    def _clear(self):
+        self._error_type = None
+        self._match = None
+        self._cer = None
+        self._substitution = None
+        self._insertion = None
+        self._deletion = None
+
+    # cache
     def match(self) -> bool:
+        if self._match is not None:
+            return self._match
+        self._match = False
         if len(self.outputs) == 1:
             if self.reference == self.outputs[0]:
-                return True
-        return False
+                self._match = True
+        # if it's a SPLIT error, we return match
+        elif len(self.outputs) > 1:
+            if self.reference == "".join(self.outputs):
+                self._match = True
+        return self._match
 
-    def get_character_level_result(self, calculator):
-        return calculator.get_distance(self.reference, " ".join(self.outputs))
+    # cache
+    def get_character_level_cer(self, calculator) -> int:
+        if self._cer is not None:
+            return self._cer
+        if self.match():
+            self._cer = 0
+        else:
+            self._cer = calculator.get_distance(self.reference, " ".join(self.outputs)).distance
+        return self._cer
 
+    # cache
     def calculate_three_kinds_of_distance(self):
+        if (self._substitution is not None) and (self._deletion is not None) and (self._insertion is not None):
+            return self._substitution + self._deletion + self._insertion, self._substitution, \
+                   self._insertion, self._deletion
         substitution = 0
         insertion = 0
         deletion = 0
@@ -418,8 +466,20 @@ class AlignedToken:
                         substitution += 1
             else:
                 substitution += 1
-        distance = substitution + insertion + deletion
-        return distance, substitution, insertion, deletion
+        self._substitution, self._insertion, self._deletion = substitution, insertion, deletion
+        return self._substitution + self._deletion + self._insertion, \
+               self._substitution, self._insertion, self._deletion
+
+    # cache
+    def classify(self) -> ErrorType:
+        if self._error_type is not None:
+            return self._error_type
+
+        if not self.match():
+            self._error_type = AlignedTokenClassifier.get_instance().error_type_classify(self)
+        else:
+            self._error_type = ErrorType.NA
+        return self._error_type
 
 
 class AlignmentResultErrorSectionList:
@@ -469,11 +529,11 @@ class AlignmentResultErrorSection:
         """
         return len(self.original_alignment_result)
 
-    def get_all_options(self) -> [AlignmentResult]:
+    def get_all_options(self, ignore_long_output=True) -> [AlignmentResult]:
         if len(self) != 2:
             return
         assign_list, first_fixed_section, second_fixed_section, all_reference, all_output = self.get_options(
-            self.original_alignment_result)
+            self.original_alignment_result, ignore_long_output)
         if len(assign_list) == 0 or assign_list is None:
             return
 
@@ -502,9 +562,16 @@ class AlignmentResultErrorSection:
         return alignment_result_options_after_assign
 
     @staticmethod
-    def get_options(original_alignment_result):
+    def get_options(original_alignment_result, ignore_long_output=True):
+
         all_reference = original_alignment_result.get_reference()
         all_output = original_alignment_result.get_outputs_list()
+        if ignore_long_output:
+            ignore_long_output_threshold = 10
+            output_size = len(all_output[0]) + len(all_output[1])
+            if output_size > ignore_long_output_threshold:
+                return [], [], [], all_reference, all_output
+
         #  get the index
         if len(all_output[0]) == 0 or len(all_output[1]) == 0:
             return all_output[0] + all_output[1], [], [], all_reference, all_output

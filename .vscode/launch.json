@@ -39,11 +39,527 @@
             }
         }        ,
         {
+            "name": "Python: transcribe-compare - medium-01",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/transcribe-compare",
+            "args": ["-R", "/medium/1/01-reference.txt", "-O", "/medium/1/01-speech-works-2019-10-05.txt", "-a", "-e", "WER", "-f", "/medium/1", "-j", "HTML", "-p", "-l"],
+            "console": "externalTerminal",
+            "pythonPath": "${config:python.pythonPath}",
+            "env": {
+                "PYTHONPATH": "${workspaceFolder}"
+            }
+        }        ,
+        {
+            "name": "Python: transcribe-compare - medium-02",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/transcribe-compare",
+            "args": ["-R", "/medium/2/02-reference.txt", "-O", "/medium/2/02-speech-works-2019-10-09.txt", "-a", "-e", "WER", "-f", "/medium/2", "-j", "HTML", "-p", "-l"],
+            "console": "externalTerminal",
+            "pythonPath": "${config:python.pythonPath}",
+            "env": {
+                "PYTHONPATH": "${workspaceFolder}"
+            }
+        }        ,
+        {
+            "name": "Python: transcribe-compare - medium-03",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/transcribe-compare",
+            "args": ["-R", "/medium/3/03-reference.txt", "-O", "/medium/3/03-speech-works-2019-10-05.txt", "-a", "-e", "WER", "-f", "/medium/3", "-j", "HTML", "-p", "-l"],
+            "console": "externalTerminal",
+            "pythonPath": "${config:python.pythonPath}",
+            "env": {
+                "PYTHONPATH": "${workspaceFolder}"
+            }
+        }        ,
+        {
+            "name": "Python: transcribe-compare - medium-04",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/transcribe-compare",
+            "args": ["-R", "/medium/4/04-reference.txt", "-O", "/medium/4/04-speech-works-2019-10-02.txt", "-a", "-e", "WER", "-f", "/medium/4", "-j", "HTML", "-p", "-l"],
+            "console": "externalTerminal",
+            "pythonPath": "${config:python.pythonPath}",
+            "env": {
+                "PYTHONPATH": "${workspaceFolder}"
+            }
+        }        ,
+        {
+            "name": "Python: transcribe-compare - medium-05",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/transcribe-compare",
+            "args": ["-R", "/medium/5/05-reference.txt", "-O", "/medium/5/05-speech-works-2019-10-04.txt", "-O", "/medium/5/05-speech-works-2019-10-09.txt", "-a", "-e", "WER", "-f", "/medium/5", "-j", "HTML", "-p", "-l"],
+            "console": "externalTerminal",
+            "pythonPath": "${config:python.pythonPath}",
+            "env": {
+                "PYTHONPATH": "${workspaceFolder}"
+            }
+        }        ,
+        {
+            "name": "Python: transcribe-compare - medium-06",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/transcribe-compare",
+            "args": ["-R", "/medium/6/06-reference.txt", "-O", "/medium/6/06-speech-works-2019-10-05.txt", "-a", "-e", "WER", "-f", "/medium/6", "-j", "HTML", "-p", "-l"],
+            "console": "externalTerminal",
+            "pythonPath": "${config:python.pythonPath}",
+            "env": {
+                "PYTHONPATH": "${workspaceFolder}"
+            }
+        }        ,
+        {
+            "name": "Python: transcribe-compare - medium-07",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/transcribe-compare",
+            "args": ["-R", "/medium/7/07-reference.txt", "-O", "/medium/7/07-speech-works-2019-10-09.txt",  "-a", "-e", "WER", "-f", "/medium/7", "-j", "HTML", "-p", "-l"],
+            "console": "externalTerminal",
+            "pythonPath": "${config:python.pythonPath}",
+            "env": {
+                "PYTHONPATH": "${workspaceFolder}"
+            }
+        }        ,
+        {
+            "name": "Python: transcribe-compare - medium-08",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/transcribe-compare",
+            "args": ["-R", "/medium/8/08-reference.txt", "-O", "/medium/8/08-speech-works-2019-10-01.txt", "-a", "-e", "WER", "-f", "/medium/8", "-j", "HTML", "-p", "-l"],
+            "console": "externalTerminal",
+            "pythonPath": "${config:python.pythonPath}",
+            "env": {
+                "PYTHONPATH": "${workspaceFolder}"
+            }
+        }        ,
+        {
+            "name": "Python: transcribe-compare - medium-09",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/transcribe-compare",
+            "args": ["-R", "/medium/9/09-reference.txt", "-O", "/medium/9/09-speech-works-2019-10-05.txt", "-a", "-e", "WER", "-f", "/medium/9", "-j", "HTML", "-p", "-l"],
+            "console": "externalTerminal",
+            "pythonPath": "${config:python.pythonPath}",
+            "env": {
+                "PYTHONPATH": "${workspaceFolder}"
+            }
+        }        ,
+        {
+            "name": "Python: transcribe-compare - medium-10",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/transcribe-compare",
+            "args": ["-R", "/medium/10/10-reference.txt", "-O", "/medium/10/10-speech-works-2019-10-05.txt", "-a", "-e", "WER", "-f", "/medium/10", "-j", "HTML", "-p", "-l"],
+            "console": "externalTerminal",
+            "pythonPath": "${config:python.pythonPath}",
+            "env": {
+                "PYTHONPATH": "${workspaceFolder}"
+            }
+        }        ,
+        {
+            "name": "Python: transcribe-compare - medium-11",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/transcribe-compare",
+            "args": ["-R", "/medium/11/11-reference.txt", "-O", "/medium/11/11-speech-works-2019-10-05.txt", "-a", "-e", "WER", "-f", "/medium/11", "-j", "HTML", "-p", "-l"],
+            "console": "externalTerminal",
+            "pythonPath": "${config:python.pythonPath}",
+            "env": {
+                "PYTHONPATH": "${workspaceFolder}"
+            }
+        }        ,
+        {
+            "name": "Python: transcribe-compare - medium-12",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/transcribe-compare",
+            "args": ["-R", "/medium/12/12-reference.txt", "-O", "/medium/12/12-speech-works-2019-10-02.txt", "-a", "-e", "WER", "-f", "/medium/12", "-j", "HTML", "-p", "-l"],
+            "console": "externalTerminal",
+            "pythonPath": "${config:python.pythonPath}",
+            "env": {
+                "PYTHONPATH": "${workspaceFolder}"
+            }
+        }        ,
+        {
+            "name": "Python: transcribe-compare - medium-13",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/transcribe-compare",
+            "args": ["-R", "/medium/13/13-reference.txt", "-O", "/medium/13/13-speech-works-2019-10-01.txt", "-a", "-e", "WER", "-f", "/medium/13", "-j", "HTML", "-p", "-l"],
+            "console": "externalTerminal",
+            "pythonPath": "${config:python.pythonPath}",
+            "env": {
+                "PYTHONPATH": "${workspaceFolder}"
+            }
+        }        ,
+        {
+            "name": "Python: transcribe-compare - medium-14",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/transcribe-compare",
+            "args": ["-R", "/medium/14/14-reference.txt", "-O", "/medium/14/14-speech-works-2019-10-08.txt", "-a", "-e", "WER", "-f", "/medium/14", "-j", "HTML", "-p", "-l"],
+            "console": "externalTerminal",
+            "pythonPath": "${config:python.pythonPath}",
+            "env": {
+                "PYTHONPATH": "${workspaceFolder}"
+            }
+        }        ,
+        {
+            "name": "Python: transcribe-compare - medium-15",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/transcribe-compare",
+            "args": ["-R", "/medium/15/15-reference.txt", "-O", "/medium/15/15-speech-works-2019-10-01.txt", "-a", "-e", "WER", "-f", "/medium/15", "-j", "HTML", "-p", "-l"],
+            "console": "externalTerminal",
+            "pythonPath": "${config:python.pythonPath}",
+            "env": {
+                "PYTHONPATH": "${workspaceFolder}"
+            }
+        }        ,
+        {
+            "name": "Python: transcribe-compare - medium-18",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/transcribe-compare",
+            "args": ["-R", "/medium/18/18-reference.txt", "-O", "/medium/18/18-speech-works-2019-10-02.txt", "-a", "-e", "WER", "-f", "/medium/18", "-j", "HTML", "-p", "-l"],
+            "console": "externalTerminal",
+            "pythonPath": "${config:python.pythonPath}",
+            "env": {
+                "PYTHONPATH": "${workspaceFolder}"
+            }
+        }        ,
+        {
+            "name": "Python: transcribe-compare - medium-19",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/transcribe-compare",
+            "args": ["-R", "/medium/19/19-reference.txt", "-O", "/medium/19/19-speech-works-2019-10-03.txt", "-a", "-e", "WER", "-f", "/medium/19", "-j", "HTML", "-p", "-l"],
+            "console": "externalTerminal",
+            "pythonPath": "${config:python.pythonPath}",
+            "env": {
+                "PYTHONPATH": "${workspaceFolder}"
+            }
+        }        ,
+        {
+            "name": "Python: transcribe-compare - medium-21",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/transcribe-compare",
+            "args": ["-R", "/medium/21/21-reference.txt", "-O", "/medium/21/21-speech-works-2019-10-08.txt", "-O", "/medium/21/21-speech-works-2019-10-09.txt", "-a", "-e", "WER", "-f", "/medium/21", "-j", "HTML", "-p", "-l"],
+            "console": "externalTerminal",
+            "pythonPath": "${config:python.pythonPath}",
+            "env": {
+                "PYTHONPATH": "${workspaceFolder}"
+            }
+        }        ,
+        {
+            "name": "Python: transcribe-compare - medium-22",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/transcribe-compare",
+            "args": ["-R", "/medium/22/22-reference.txt", "-O", "/medium/22/22-speech-works-2019-10-08.txt", "-a", "-e", "WER", "-f", "/medium/22", "-j", "HTML", "-p", "-l"],
+            "console": "externalTerminal",
+            "pythonPath": "${config:python.pythonPath}",
+            "env": {
+                "PYTHONPATH": "${workspaceFolder}"
+            }
+        }        ,
+        {
+            "name": "Python: transcribe-compare - medium-23",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/transcribe-compare",
+            "args": ["-R", "/medium/23/23-reference.txt", "-O", "/medium/23/23-speech-works-2019-10-08.txt", "-O", "/medium/23/23-speech-works-2019-10-09.txt", "-a", "-e", "WER", "-f", "/medium/23", "-j", "HTML", "-p", "-l"],
+            "console": "externalTerminal",
+            "pythonPath": "${config:python.pythonPath}",
+            "env": {
+                "PYTHONPATH": "${workspaceFolder}"
+            }
+        }        ,
+        {
             "name": "Python: transcribe-compare - medium-24",
             "type": "python",
             "request": "launch",
             "program": "${workspaceFolder}/transcribe-compare",
-            "args": ["-R", "/medium/24/24-reference.txt", "-O", "/medium/24/24-smart-works-2019-09-27.txt", "-a", "-e", "WER", "-f", "/medium/24", "-j", "HTML", "-p", "-l"],
+            "args": ["-R", "/medium/24/24-reference.txt", "-O", "/medium/24/24-speech-works-2019-09-27.txt", "-a", "-e", "WER", "-f", "/medium/24", "-j", "HTML", "-p", "-l"],
+            "console": "externalTerminal",
+            "pythonPath": "${config:python.pythonPath}",
+            "env": {
+                "PYTHONPATH": "${workspaceFolder}"
+            }
+        }        ,
+        {
+            "name": "Python: transcribe-compare - medium-25",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/transcribe-compare",
+            "args": ["-R", "/medium/25/25-reference.txt", "-O", "/medium/25/25-speech-works-2019-10-01.txt", "-a", "-e", "WER", "-f", "/medium/25", "-j", "HTML", "-p", "-l"],
+            "console": "externalTerminal",
+            "pythonPath": "${config:python.pythonPath}",
+            "env": {
+                "PYTHONPATH": "${workspaceFolder}"
+            }
+        }        ,
+        {
+            "name": "Python: transcribe-compare - medium-26",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/transcribe-compare",
+            "args": ["-R", "/medium/26/26-reference.txt", "-O", "/medium/26/26-speech-works-2019-10-02.txt", "-O", "/medium/26/26-speech-works-2019-10-09.txt", "-a", "-e", "WER", "-f", "/medium/26", "-j", "HTML", "-p", "-l"],
+            "console": "externalTerminal",
+            "pythonPath": "${config:python.pythonPath}",
+            "env": {
+                "PYTHONPATH": "${workspaceFolder}"
+            }
+        }        ,
+        {
+            "name": "Python: transcribe-compare - medium-27",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/transcribe-compare",
+            "args": ["-R", "/medium/27/27-reference.txt", "-O", "/medium/27/27-speech-works-2019-10-08.txt", "-a", "-e", "WER", "-f", "/medium/27", "-j", "HTML", "-p", "-l"],
+            "console": "externalTerminal",
+            "pythonPath": "${config:python.pythonPath}",
+            "env": {
+                "PYTHONPATH": "${workspaceFolder}"
+            }
+        }        ,
+        {
+            "name": "Python: transcribe-compare - medium-28",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/transcribe-compare",
+            "args": ["-R", "/medium/28/28-reference.txt", "-O", "/medium/28/28-speech-works-2019-10-05.txt", "-a", "-e", "WER", "-f", "/medium/28", "-j", "HTML", "-p", "-l"],
+            "console": "externalTerminal",
+            "pythonPath": "${config:python.pythonPath}",
+            "env": {
+                "PYTHONPATH": "${workspaceFolder}"
+            }
+        }        ,
+        {
+            "name": "Python: transcribe-compare - medium-29",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/transcribe-compare",
+            "args": ["-R", "/medium/29/29-reference.txt", "-O", "/medium/29/29-speech-works-2019-10-05.txt", "-a", "-e", "WER", "-f", "/medium/29", "-j", "HTML", "-p", "-l"],
+            "console": "externalTerminal",
+            "pythonPath": "${config:python.pythonPath}",
+            "env": {
+                "PYTHONPATH": "${workspaceFolder}"
+            }
+        }        ,
+        {
+            "name": "Python: transcribe-compare - medium-30",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/transcribe-compare",
+            "args": ["-R", "/medium/30/30-reference.txt", "-O", "/medium/30/30-speech-works-2019-10-08.txt", "-a", "-e", "WER", "-f", "/medium/30", "-j", "HTML", "-p", "-l"],
+            "console": "externalTerminal",
+            "pythonPath": "${config:python.pythonPath}",
+            "env": {
+                "PYTHONPATH": "${workspaceFolder}"
+            }
+        }        ,
+        {
+            "name": "Python: transcribe-compare - medium-31",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/transcribe-compare",
+            "args": ["-R", "/medium/31/31-reference.txt", "-O", "/medium/31/31-speech-works-2019-10-03.txt", "-a", "-e", "WER", "-f", "/medium/31", "-j", "HTML", "-p", "-l"],
+            "console": "externalTerminal",
+            "pythonPath": "${config:python.pythonPath}",
+            "env": {
+                "PYTHONPATH": "${workspaceFolder}"
+            }
+        }         ,
+        {
+            "name": "Python: transcribe-compare - medium-32",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/transcribe-compare",
+            "args": ["-R", "/medium/32/32-reference.txt", "-O", "/medium/32/32-speech-works-2019-10-05.txt", "-a", "-e", "WER", "-f", "/medium/32", "-j", "HTML", "-p", "-l"],
+            "console": "externalTerminal",
+            "pythonPath": "${config:python.pythonPath}",
+            "env": {
+                "PYTHONPATH": "${workspaceFolder}"
+            }
+        }       ,
+        {
+            "name": "Python: transcribe-compare - medium-33",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/transcribe-compare",
+            "args": ["-R", "/medium/33/33-reference.txt", "-O", "/medium/33/33-speech-works-2019-10-04.txt", "-a", "-e", "WER", "-f", "/medium/33", "-j", "HTML", "-p", "-l"],
+            "console": "externalTerminal",
+            "pythonPath": "${config:python.pythonPath}",
+            "env": {
+                "PYTHONPATH": "${workspaceFolder}"
+            }
+        }       ,
+        {
+            "name": "Python: transcribe-compare - medium-34",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/transcribe-compare",
+            "args": ["-R", "/medium/34/34-reference.txt", "-O", "/medium/34/34-speech-works-2019-10-08.txt", "-a", "-e", "WER", "-f", "/medium/34", "-j", "HTML", "-p", "-l"],
+            "console": "externalTerminal",
+            "pythonPath": "${config:python.pythonPath}",
+            "env": {
+                "PYTHONPATH": "${workspaceFolder}"
+            }
+        }        ,
+        {
+            "name": "Python: transcribe-compare - medium-35",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/transcribe-compare",
+            "args": ["-R", "/medium/35/35-reference.txt", "-O", "/medium/35/35-speech-works-2019-09-27.txt", "-a", "-e", "WER", "-f", "/medium/35", "-j", "HTML", "-p", "-l"],
+            "console": "externalTerminal",
+            "pythonPath": "${config:python.pythonPath}",
+            "env": {
+                "PYTHONPATH": "${workspaceFolder}"
+            }
+        }         ,
+        {
+            "name": "Python: transcribe-compare - medium-36",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/transcribe-compare",
+            "args": ["-R", "/medium/36/36-reference.txt", "-O", "/medium/36/36-speech-works-2019-09-27.txt", "-a", "-e", "WER", "-f", "/medium/36", "-j", "HTML", "-p", "-l"],
+            "console": "externalTerminal",
+            "pythonPath": "${config:python.pythonPath}",
+            "env": {
+                "PYTHONPATH": "${workspaceFolder}"
+            }
+        }        ,
+        {
+            "name": "Python: transcribe-compare - medium-37",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/transcribe-compare",
+            "args": ["-R", "/medium/37/37-reference.txt", "-O", "/medium/37/37-speech-works-2019-10-03.txt", "-a", "-e", "WER", "-f", "/medium/37", "-j", "HTML", "-p", "-l"],
+            "console": "externalTerminal",
+            "pythonPath": "${config:python.pythonPath}",
+            "env": {
+                "PYTHONPATH": "${workspaceFolder}"
+            }
+        }       ,
+        {
+            "name": "Python: transcribe-compare - medium-38",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/transcribe-compare",
+            "args": ["-R", "/medium/38/38-reference.txt", "-O", "/medium/38/38-speech-works-2019-10-02.txt", "-O", "/medium/38/38-speech-works-2019-10-09.txt","-a", "-e", "WER", "-f", "/medium/38", "-j", "HTML", "-p", "-l"],
+            "console": "externalTerminal",
+            "pythonPath": "${config:python.pythonPath}",
+            "env": {
+                "PYTHONPATH": "${workspaceFolder}"
+            }
+        }        ,
+        {
+            "name": "Python: transcribe-compare - medium-39",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/transcribe-compare",
+            "args": ["-R", "/medium/39/39-reference.txt", "-O", "/medium/39/39-speech-works-2019-10-02.txt", "-a", "-e", "WER", "-f", "/medium/39", "-j", "HTML", "-p", "-l"],
+            "console": "externalTerminal",
+            "pythonPath": "${config:python.pythonPath}",
+            "env": {
+                "PYTHONPATH": "${workspaceFolder}"
+            }
+        }        ,
+        {
+            "name": "Python: transcribe-compare - medium-40",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/transcribe-compare",
+            "args": ["-R", "/medium/40/40-reference.txt", "-O", "/medium/40/40-speech-works-2019-10-08.txt", "-a", "-e", "WER", "-f", "/medium/40", "-j", "HTML", "-p", "-l"],
+            "console": "externalTerminal",
+            "pythonPath": "${config:python.pythonPath}",
+            "env": {
+                "PYTHONPATH": "${workspaceFolder}"
+            }
+        }         ,
+        {
+            "name": "Python: transcribe-compare - medium-41",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/transcribe-compare",
+            "args": ["-R", "/medium/41/41-reference.txt", "-O", "/medium/41/41-speech-works-2019-10-05.txt", "-a", "-e", "WER", "-f", "/medium/41", "-j", "HTML", "-p", "-l"],
+            "console": "externalTerminal",
+            "pythonPath": "${config:python.pythonPath}",
+            "env": {
+                "PYTHONPATH": "${workspaceFolder}"
+            }
+        }        ,
+        {
+            "name": "Python: transcribe-compare - medium-43",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/transcribe-compare",
+            "args": ["-R", "/medium/43/43-reference.txt", "-O", "/medium/43/43-speech-works-2019-10-01.txt", "-a", "-e", "WER", "-f", "/medium/43", "-j", "HTML", "-p", "-l"],
+            "console": "externalTerminal",
+            "pythonPath": "${config:python.pythonPath}",
+            "env": {
+                "PYTHONPATH": "${workspaceFolder}"
+            }
+        }        ,
+        {
+            "name": "Python: transcribe-compare - medium-44",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/transcribe-compare",
+            "args": ["-R", "/medium/44/44-reference.txt", "-O", "/medium/44/44-speech-works-2019-10-05.txt", "-a", "-e", "WER", "-f", "/medium/44", "-j", "HTML", "-p", "-l"],
+            "console": "externalTerminal",
+            "pythonPath": "${config:python.pythonPath}",
+            "env": {
+                "PYTHONPATH": "${workspaceFolder}"
+            }
+        }        ,
+        {
+            "name": "Python: transcribe-compare - medium-45",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/transcribe-compare",
+            "args": ["-R", "/medium/45/45-reference.txt", "-O", "/medium/45/45-speech-works-2019-10-08.txt", "-a", "-e", "WER", "-f", "/medium/45", "-j", "HTML", "-p", "-l"],
+            "console": "externalTerminal",
+            "pythonPath": "${config:python.pythonPath}",
+            "env": {
+                "PYTHONPATH": "${workspaceFolder}"
+            }
+        }        ,
+        {
+            "name": "Python: transcribe-compare - medium-46",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/transcribe-compare",
+            "args": ["-R", "/medium/46/46-reference.txt", "-O", "/medium/46/46-speech-works-2019-10-02.txt", "-a", "-e", "WER", "-f", "/medium/46", "-j", "HTML", "-p", "-l"],
+            "console": "externalTerminal",
+            "pythonPath": "${config:python.pythonPath}",
+            "env": {
+                "PYTHONPATH": "${workspaceFolder}"
+            }
+        }        ,
+        {
+            "name": "Python: transcribe-compare - medium-47",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/transcribe-compare",
+            "args": ["-R", "/medium/47/47-reference.txt", "-O", "/medium/47/47-speech-works-2019-10-05.txt", "-a", "-e", "WER", "-f", "/medium/47", "-j", "HTML", "-p", "-l"],
+            "console": "externalTerminal",
+            "pythonPath": "${config:python.pythonPath}",
+            "env": {
+                "PYTHONPATH": "${workspaceFolder}"
+            }
+        }        ,
+        {
+            "name": "Python: transcribe-compare - medium-48",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/transcribe-compare",
+            "args": ["-R", "/medium/48/48-reference.txt", "-O", "/medium/48/48-speech-works-2019-10-03.txt", "-a", "-e", "WER", "-f", "/medium/48", "-j", "HTML", "-p", "-l"],
             "console": "externalTerminal",
             "pythonPath": "${config:python.pythonPath}",
             "env": {

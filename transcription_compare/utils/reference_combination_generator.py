@@ -36,18 +36,27 @@ class SimpleReferenceCombinationGenerator(ReferenceCombinationGenerator):
     def __init__(self):
         self.reference_list = []
 
-    def add_new_token_options(self, list_of_options):
+    def add_new_token_options(self, set_of_options):
+        """
+        :param set_of_options: Set / List of options, each option can be a string or a list
+        :return:
+        """
         if len(self.reference_list) == 0:
             # add_new_token_options(list_of_options=["one", "first"])
             # want to get [["one"], ["first"]]
-            for option in list_of_options:
-                self.reference_list.append([option])
+            for option in set_of_options:
+                if isinstance(option, str):
+                    option = [option]
+                self.reference_list.append(option)
+                # print(self.reference_list)
         else:
             new_reference_list = []
             for ref in self.reference_list:
-                for option in list_of_options:
+                for option in set_of_options:
+                    if isinstance(option, str):
+                        option = [option]
                     ref_copy = ref.copy()
-                    ref_copy.append(option)
+                    ref_copy += option
                     new_reference_list.append(ref_copy)
             self.reference_list = new_reference_list
 
