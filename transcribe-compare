@@ -84,7 +84,7 @@ def main(reference, output, reference_file, output_file, alignment, error_type, 
             local_optimizers = [LocalCerOptimizer()]
             # we are not using digit util because the result have different length.
         else:
-            local_optimizers = [DigitUtil(), LocalCerOptimizer()]
+            local_optimizers = [DigitUtil(process_output_digit=True), LocalCerOptimizer()]
             # local_optimizers = [LocalCerOptimizer()]
 
         calculator = UKKLevenshteinDistanceCalculator(

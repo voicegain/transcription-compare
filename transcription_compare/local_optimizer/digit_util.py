@@ -7,8 +7,9 @@ from .local_optimizer import LocalOptimizer
 
 
 class DigitUtil(LocalOptimizer):
-    def __init__(self):
+    def __init__(self, process_output_digit=False):
         self.p = inflect.engine()
+        self.process_output_digit = process_output_digit
 
     def number_to_word(self, num, ordinal=False):
         words = set()
@@ -24,10 +25,6 @@ class DigitUtil(LocalOptimizer):
         words.add(self.p.number_to_words(num, group=1, zero='oh'))
         words.add(self.p.number_to_words(num, group=2, zero='oh'))
         words.add(self.p.number_to_words(num, group=3, zero='oh'))
-        # words = list(words)
-        # for index, x in enumerate(words):
-        #     if x.find(",") >= 1:
-        #         words[index] = words[index].replace(",", "")
         return set(words)
 
     def century(self, number):
@@ -36,7 +33,7 @@ class DigitUtil(LocalOptimizer):
         else:
             result = self.p.number_to_words(number, group=2)
         if result[-1] != 'y':
-            result = result + 's'
+            result += 's'
         else:
             result = result[:-1] + 'ies'
 
@@ -85,31 +82,49 @@ class DigitUtil(LocalOptimizer):
 
     def update_alignment_result_error_section(self, alignment_result_error_section):
         alignment_result = alignment_result_error_section.original_alignment_result
+
+        update_result = self.update_alignment_result(alignment_result, False)
+        if update_result is not None:
+            alignment_result = update_result
+
+        if self.process_output_digit:
+            update_result = self.update_alignment_result(alignment_result, True)
+            if update_result is not None:
+                alignment_result = update_result
+
+        return alignment_result
+
+    def update_alignment_result(self, alignment_result, process_output_digit):
+
         word_tokenizer = WordTokenizer()
-        # print('alignment_result', alignment_result)
-        #   alignment_result = result.alignment_result
-        aligned_tokens_list = alignment_result.aligned_tokens_list
 
         calculator = UKKLevenshteinDistanceCalculator(
-                    tokenizer=None,
-                    get_alignment_result=False
-                )
-        outputs = alignment_result.get_outputs()
-        # original_ref_string = alignment_result.get_reference_str()
-        # print("++++++++++++++++before calculate three in DU")
+            tokenizer=None,
+            get_alignment_result=False
+        )
+
+        # get output token list
+        output_token_list = alignment_result.get_outputs()
+        reference_token_list = alignment_result.get_reference()
+
         old_distance = alignment_result.calculate_three_kinds_of_distance()[0]
+
         generator = SimpleReferenceCombinationGenerator()
+
         tmp_result = None
         no_digit = True
-        for index in range(0, len(alignment_result)):
-            # if aligned_tokens_list[index].reference.isdigit() is True:
-            current_ref = aligned_tokens_list[index].reference
-            result_digit = self.our_is_digit(current_ref)
+
+        if process_output_digit:
+            token_list_to_check_digit = output_token_list
+        else:
+            token_list_to_check_digit = reference_token_list
+
+        for current_str in token_list_to_check_digit:
+
+            result_digit = self.our_is_digit(current_str)
             if result_digit:
-                # print('yes', result_digit)
                 no_digit = False
                 for r in result_digit:
-
                     # tokenize the string
                     tokenized_r = []
                     for option in r:
@@ -117,40 +132,37 @@ class DigitUtil(LocalOptimizer):
 
                     generator.add_new_token_options(tokenized_r)
             else:
+                generator.add_new_token_options([current_str])
 
-                # print('no', result_digit)
-                generator.add_new_token_options([current_ref])
         if no_digit:
             return None
 
-        # print('generator.get_all_reference()', generator.get_all_reference())
         for x in generator.get_all_reference():
-            # print(x)
-            distance = calculator.get_result_from_list(
-                x, outputs
-            ).distance
-            # print('x', x)
-            # print('output_string', output_string)
-            # print('distance', distance)
-            # print('old_distance', old_distance)
+            if process_output_digit:
+                distance = calculator.get_result_from_list(
+                    reference_token_list, x
+                ).distance
+            else:
+                distance = calculator.get_result_from_list(
+                    x, output_token_list
+                ).distance
 
             if distance < old_distance:
                 old_distance = distance
                 tmp_result = x
-            # print('tmp', tmp_result)
 
         if tmp_result is None:
             return None
-        # else:
-        #     if original_ref_string !=tmp_result:
-        #        print("Update from '{}' to '{}', {}".format(original_ref_string, tmp_result, original_ref_string==tmp_result))
+
         calculator2 = UKKLevenshteinDistanceCalculator(
             tokenizer=None,
             get_alignment_result=True
         )
-        # print(">>>>>>>>>>>>>not None")
-        update_result = calculator2.get_result_from_list(
-            tmp_result, outputs).alignment_result
 
-        # print(update_result)
+        if process_output_digit:
+            update_result = calculator2.get_result_from_list(
+                reference_token_list, tmp_result).alignment_result
+        else:
+            update_result = calculator2.get_result_from_list(
+                tmp_result, output_token_list).alignment_result
         return update_result
