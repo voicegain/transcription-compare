@@ -35,6 +35,9 @@ Options:
 + click
 + inflect
 + re
++ nltk
++ metaphone
++ matplotlib
 
 # Sample Commands
 
