@@ -1,2 +1,3 @@
 include transcription_compare/results/names_csv/*
 include transcription_compare/utils/alternative_spelling.txt
+include transcription_compare/results/in_wiki_not_in_wordnet.csv
