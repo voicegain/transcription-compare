@@ -7,12 +7,9 @@ with open("README.md", "r") as fh:
     long_description = fh.read()
 
 setuptools.setup(
-    name="transcribe-compare",
-    version="0.1.0",
-    author="Huishen Zhan, Kuo Zhang, Jacek Jarmulak",
-    author_email="huishen@voicegain.ai, kuo@voicegain.ai, jacek@voicegain.ai",
-    description="Voicegain Compare transcription",
-    download_url='',
+    name="transcription_compare",
+    version="0.0.14",
+    description="Compare transcription",
     long_description=long_description,
     long_description_content_type="text/markdown",
     packages=setuptools.find_packages(),
