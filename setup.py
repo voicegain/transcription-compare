@@ -12,7 +12,7 @@ setuptools.setup(
     author="Huishen Zhan, Kuo Zhang, Jacek Jarmulak",
     author_email="huishen@voicegain.ai, kuo@voicegain.ai, jacek@voicegain.ai",
     description="Voicegain Compare transcription",
-    download_url='https://github.com/voicegain/transcription-compare/archive/0.2.0.tar.gz',
+    download_url='https://github.com/voicegain/transcription-compare/archive/0.2.1.tar.gz',
     long_description=long_description,
     long_description_content_type="text/markdown",
     packages=setuptools.find_packages(),
