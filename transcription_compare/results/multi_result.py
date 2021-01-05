@@ -270,6 +270,11 @@ class MultiAlignmentResult:
 
         # print(all_count_error_type)
     def to_html_error_type(self, total_rows):
+        def get_string_in_error_type(x, y):
+            if y == 0:
+                return "N/A"
+            return str(round(100*x/y, 7))
+
         all_count_error_type = self.all_error_type()
         body = ''
         for key in ErrorType:
@@ -279,7 +284,7 @@ class MultiAlignmentResult:
             for j in range(len(all_count_error_type)):
                 # print('all_count_error_type[j][key]', all_count_error_type[j][key])
                 body += '\n<td>' + str(all_count_error_type[j][key]) + '</td>'
-                body += '\n<td>' + str(round(100*all_count_error_type[j][key]/total_rows, 7)) + '</td>' #  /all rows
+                body += '\n<td>' + get_string_in_error_type(all_count_error_type[j][key], total_rows) + '</td>' #  /all rows
         body += '\n</tr>'
         return body
 
