@@ -2,17 +2,17 @@ from .abstract_tokenizer import AbstractTokenizer
 from nltk.tokenize import word_tokenize
 from ..tokens import Token
 import re
+import string
 # brackets_allowed = ['[', ']', ')', ">", '(', "<"]
 
 FILL_WORD_LIST = {"um", "mhmm", "hmm", "uh", "huh"}
 
 whitespace = ' \t\n\r\v\f'
-ascii_lowercase = 'abcdefghijklmnopqrstuvwxyz'
-ascii_uppercase = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
-ascii_letters = ascii_lowercase + ascii_uppercase
+ascii_letters = string.ascii_letters
 digits = '0123456789'
 pun = "'"
 allow_character = set(digits + ascii_letters + whitespace + pun)
+es_allow_character = set(digits + ascii_letters + whitespace + "ñáéíóúü")
 
 
 class TokenWithPrePostFlag:
@@ -22,6 +22,9 @@ class TokenWithPrePostFlag:
 
 
 class WordTokenizer(AbstractTokenizer):
+
+    def __init__(self, lang="en"):
+        self.lang = lang
 
     def tokenize(self, token_string, brackets_list=None, to_lower=False, remove_punctuation=False, use_alternative_spelling=False):
         """
@@ -41,8 +44,12 @@ class WordTokenizer(AbstractTokenizer):
                 # punctuation = r"""!"#$%&()*+,-./:;<=>?@[\]^_`{|}~"""
                 # s = s.translate(str.maketrans('', '', punctuation))
                 new_s = ''
+                if self.lang == "en":
+                    ac = allow_character
+                else:
+                    ac = es_allow_character
                 for one_character in s:
-                    if one_character in allow_character:
+                    if one_character in ac:
                         new_s += one_character
                     else:
                         new_s += " "
