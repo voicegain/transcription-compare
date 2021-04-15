@@ -49,6 +49,10 @@ python transcribe-compare -R sample_data/The_Princess_and_the_Pea-reference.txt 
 
 ![HTML Output: Single Compare - Stats](/images/compare-single-stats.PNG)
 
+# Related code
+
+There is a script available that using `transcribe-compare` to compare results from Voicegaing and Google recognizers. You can find it here: https://github.com/voicegain/platform/tree/master/utility-scripts/test-transcribe
+
 ## Acknowledgements
 
 Contributed by [VoiceGain](https://www.voicegain.ai).
