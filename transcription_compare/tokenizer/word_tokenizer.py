@@ -48,11 +48,18 @@ class WordTokenizer(AbstractTokenizer):
                     ac = allow_character
                 else:
                     ac = es_allow_character
-                for one_character in s:
+                # todo
+                # \d+.\d+
+                # two_money = re.findall("\d+.\d+", text)
+                for i, one_character in enumerate(s):
                     if one_character in ac:
                         new_s += one_character
                     else:
-                        new_s += " "
+                        # keep point in digit
+                        if one_character == "." and i != 0 and s[i-1] in digits and i != len(s)-1 and s[i+1] in digits:
+                            new_s += one_character
+                        else:
+                            new_s += " "
                 s = new_s
             if to_lower:
                 s = s.lower()

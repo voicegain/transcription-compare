@@ -4,12 +4,14 @@ from transcription_compare.levenshtein_distance_calculator import UKKLevenshtein
 from transcription_compare.tokenizer import WordTokenizer
 from transcription_compare.utils import SimpleReferenceCombinationGenerator
 from .local_optimizer import LocalOptimizer
-
+from nltk.stem.snowball import SnowballStemmer
+keywords_stemmer = SnowballStemmer("english")
 
 class DigitUtil(LocalOptimizer):
-    def __init__(self, process_output_digit=False):
+    def __init__(self, process_output_digit=True, only_exact_match=False):
         self.p = inflect.engine()
         self.process_output_digit = process_output_digit
+        self.only_exact_match = only_exact_match
 
     def number_to_word(self, num, ordinal=False):
         words = set()
@@ -57,28 +59,30 @@ class DigitUtil(LocalOptimizer):
         if len(number) > 0:
             if input_string.replace(',', '').isdigit() is True:
                 # After removing , it's digit
-                return [self.number_to_word(input_string)]
+                return [self.number_to_word(input_string)], 1
 
             elif len(number[0])+2 == len(input_string)\
                     and (input_string[-3:] in {'1st', '2nd', '3rd'} or (input_string[-2:] == 'th')):
                 # 1st, 2nd, 3rd, 4th ...
-                return [self.number_to_word(input_string, ordinal=True)]
+                return [self.number_to_word(input_string, ordinal=True)], 1
 
             elif len(number[0])+1 == len(input_string) and input_string[-1] == 's':
-                return [self.century(input_string)]
+                return [self.century(input_string)], 1
 
             else:
                 # ???
                 string = re.findall(r'[0-9.]+|[a-zA-Z]+', input_string)
                 result = []
+                c = 0
                 for character in string:
                     if character.replace(".", "", 1).isdigit() is False:
                         result.append({character})
                     else:
+                        c += 1
                         result.append(self.number_to_word(character))
-            return result
+            return result, c
         else:
-            return []
+            return [], 0
 
     def update_alignment_result_error_section(self, alignment_result_error_section):
         alignment_result = alignment_result_error_section.original_alignment_result
@@ -116,13 +120,19 @@ class DigitUtil(LocalOptimizer):
 
         if process_output_digit:
             token_list_to_check_digit = output_token_list
+            token_list_not_check_digit = reference_token_list
         else:
             token_list_to_check_digit = reference_token_list
+            token_list_not_check_digit = output_token_list
+        # token_list_to_check_digit = reference_token_list
 
+        digits_count = 0
         for current_str in token_list_to_check_digit:
 
-            result_digit = self.our_is_digit(current_str)
+            result_digit, c = self.our_is_digit(current_str)
+            digits_count += c
             if result_digit:
+
                 no_digit = False
                 for r in result_digit:
                     # tokenize the string
@@ -138,6 +148,18 @@ class DigitUtil(LocalOptimizer):
             return None
 
         for x in generator.get_all_reference():
+
+            expected_new_distance = 0
+            if self.only_exact_match:
+                expected_distance_dec = digits_count + min(
+                    (len(x) - len(token_list_to_check_digit)), 
+                    max(0, len(token_list_not_check_digit) - len(token_list_to_check_digit))
+                )
+                expected_new_distance = old_distance - expected_distance_dec
+
+                if expected_new_distance < 0:
+                    continue
+
             if process_output_digit:
                 distance = calculator.get_result_from_list(
                     reference_token_list, x
@@ -147,9 +169,14 @@ class DigitUtil(LocalOptimizer):
                     x, output_token_list
                 ).distance
 
-            if distance < old_distance:
-                old_distance = distance
-                tmp_result = x
+            if self.only_exact_match:
+                if distance == expected_new_distance:
+                    tmp_result = x
+                    break
+            else:
+                if distance < old_distance:
+                    old_distance = distance
+                    tmp_result = x
 
         if tmp_result is None:
             return None
@@ -158,7 +185,6 @@ class DigitUtil(LocalOptimizer):
             tokenizer=None,
             get_alignment_result=True
         )
-
         if process_output_digit:
             update_result = calculator2.get_result_from_list(
                 reference_token_list, tmp_result).alignment_result

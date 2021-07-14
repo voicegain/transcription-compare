@@ -61,6 +61,16 @@ class SimpleReferenceCombinationGenerator(ReferenceCombinationGenerator):
             self.reference_list = new_reference_list
 
     def get_all_reference(self):
+        # todo ?
+        # print("self.reference_list", self.reference_list)
+        if self.reference_list:
+            for one_ in self.reference_list:
+                # print("one_", one_)
+                if "and" in one_:
+                    new_one = one_.copy()
+                    new_one.remove('and')
+                    self.reference_list.append(new_one)
+        # print("self.reference_list after update", self.reference_list)
         return self.reference_list
 
 
