@@ -1,5 +1,6 @@
 from .abstract_tokenizer import AbstractTokenizer
 from nltk.tokenize import word_tokenize
+from .special_token_utils import *
 from ..tokens import Token
 import re
 import string
@@ -35,6 +36,24 @@ class WordTokenizer(AbstractTokenizer):
         :param use_alternative_spelling: True means we won't count different English version errors.
         :return:split token_string
         """
+
+        split_tokens = token_string.split()
+        methods = [process_email, process_url, process_and]
+        new_tokens = []
+        for token in split_tokens:
+            updated = False
+            for method in methods:
+                updated_word = method(token)
+                if updated_word:
+                    new_tokens.append(updated_word)
+                    # print("method", method)
+                    # print("updated_word", token, updated_word)
+                    updated = True
+                    break
+            if not updated:
+                new_tokens.append(token)
+
+        token_string = " ".join(new_tokens)
 
         def clean_words_dont_have_brackets(s):
             # do punctuation or lower
